@@ -38,19 +38,27 @@
             font-weight: 600;
         }
 
+        .top-toolbar {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 0.75rem 2rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
         .main-container {
             display: grid;
-            grid-template-columns: 350px 1fr 300px;
+            grid-template-columns: 280px 1fr 320px;
             grid-template-rows: 1fr;
-            height: calc(100vh - 80px);
-            gap: 1rem;
-            padding: 1rem;
+            height: calc(100vh - 140px);
+            gap: 0;
         }
 
         .left-panel {
             background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-right: 1px solid #e0e0e0;
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -58,8 +66,6 @@
 
         .canvas-area {
             background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -67,11 +73,120 @@
 
         .right-panel {
             background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 1px solid #e0e0e0;
             overflow: hidden;
             display: flex;
             flex-direction: column;
+        }
+
+        .symbol-library {
+            padding: 1rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .symbol-category {
+            margin-bottom: 1.5rem;
+        }
+
+        .symbol-category h3 {
+            font-size: 0.9rem;
+            color: #666;
+            margin: 0 0 0.75rem 0;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .symbol-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+
+        .symbol-item {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 0.75rem;
+            cursor: grab;
+            transition: all 0.2s ease;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .symbol-item:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateY(-1px);
+        }
+
+        .symbol-item:active {
+            cursor: grabbing;
+        }
+
+        .symbol-item svg {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 0.25rem;
+        }
+
+        .symbol-item .label {
+            font-size: 0.7rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .toolbar-btn {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .toolbar-btn:hover {
+            background: #f0f4ff;
+            border-color: #667eea;
+        }
+
+        .toolbar-btn.primary {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .toolbar-btn.primary:hover {
+            background: #5a6fd8;
+        }
+
+        .toolbar-btn.success {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+
+        .toolbar-btn.success:hover {
+            background: #218838;
+        }
+
+        .connector-line {
+            stroke: #333;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .connector-point {
+            fill: #667eea;
+            stroke: white;
+            stroke-width: 2;
+            cursor: pointer;
         }
 
         .panel-header {
@@ -353,86 +468,179 @@
         <h1><i class="pi pi-th-large"></i> Graphic Library Builder - Digital Twin Configuration</h1>
     </div>
 
+    <!-- Top Toolbar -->
+    <div class="top-toolbar">
+        <button class="toolbar-btn primary" onclick="saveLayout()">
+            <i class="pi pi-save"></i> Save Layout
+        </button>
+        <button class="toolbar-btn success" onclick="previewLive()">
+            <i class="pi pi-play"></i> Preview Live
+        </button>
+        <button class="toolbar-btn" onclick="exportDiagram()">
+            <i class="pi pi-download"></i> Export
+        </button>
+        <div style="margin-left: auto; display: flex; gap: 1rem; align-items: center;">
+            <span style="font-size: 0.9rem; color: #666;">Drawing Mode:</span>
+            <button class="toolbar-btn" id="drawingMode" onclick="toggleDrawingMode()">
+                <i class="pi pi-pencil"></i> Connect
+            </button>
+            <button class="toolbar-btn" onclick="clearCanvas()">
+                <i class="pi pi-trash"></i> Clear
+            </button>
+        </div>
+    </div>
+
     <div class="main-container">
-        <!-- Left Panel: Upload & Gallery -->
+        <!-- Left Panel: P&ID Symbol Library -->
         <div class="left-panel">
-            <!-- Upload Panel -->
             <div class="panel-header">
-                <i class="pi pi-upload"></i> Upload Graphics
+                <i class="pi pi-th-large"></i> P&ID Symbol Library
             </div>
             
-            <div class="upload-zone" id="uploadZone">
-                <i class="pi pi-cloud-upload"></i>
-                <div>Drag & Drop graphics here</div>
-                <div style="font-size: 0.8rem; color: #666; margin-top: 0.5rem;">
-                    Supports: .svg, .png, .jpg
+            <div class="symbol-library" id="symbolLibrary">
+                <!-- Pumps & Compressors -->
+                <div class="symbol-category">
+                    <h3>Pumps & Compressors</h3>
+                    <div class="symbol-grid">
+                        <div class="symbol-item" draggable="true" data-symbol="centrifugal-pump">
+                            <svg viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="35" fill="#4CAF50" stroke="#333" stroke-width="2"/>
+                                <path d="M25 50 L75 50 M50 25 L50 75" stroke="white" stroke-width="2"/>
+                            </svg>
+                            <div class="label">Pump</div>
+                        </div>
+                        <div class="symbol-item" draggable="true" data-symbol="compressor">
+                            <svg viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="35" fill="#FF9800" stroke="#333" stroke-width="2"/>
+                                <polygon points="35,35 65,35 50,65" fill="white"/>
+                            </svg>
+                            <div class="label">Compressor</div>
+                        </div>
+                        <div class="symbol-item" draggable="true" data-symbol="fan">
+                            <svg viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="35" fill="#2196F3" stroke="#333" stroke-width="2"/>
+                                <path d="M35 35 L65 65 M35 65 L65 35" stroke="white" stroke-width="3"/>
+                            </svg>
+                            <div class="label">Fan</div>
+                        </div>
+                    </div>
                 </div>
-                <input type="file" id="fileInput" class="hidden" multiple accept=".svg,.png,.jpg,.jpeg">
-                <button class="btn" onclick="document.getElementById('fileInput').click()" style="margin-top: 1rem;">
-                    Choose Files
-                </button>
-            </div>
 
-            <div class="form-group">
-                <label for="systemType">System Type</label>
-                <select id="systemType" class="form-control">
-                    <option value="">Select System Type</option>
-                    <option value="condensate">Condensate</option>
-                    <option value="feedwater">Feed Water</option>
-                    <option value="sh_rh">SH/RH</option>
-                    <option value="steam">Steam</option>
-                    <option value="cooling">Cooling</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="tagCategory">Tag Category</label>
-                <select id="tagCategory" class="form-control">
-                    <option value="">Select Tag Category</option>
-                    <option value="pump">Pump</option>
-                    <option value="valve">Valve</option>
-                    <option value="heat_exchanger">Heat Exchanger</option>
-                    <option value="sensor">Sensor</option>
-                    <option value="motor">Motor</option>
-                    <option value="pipe">Pipe</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="description">Description</label>
-                <textarea id="description" class="form-control" rows="3" placeholder="Enter description..."></textarea>
-            </div>
-
-            <!-- Thumbnail Gallery -->
-            <div class="panel-header" style="margin-top: 1rem;">
-                <i class="pi pi-images"></i> Graphic Library
-            </div>
-
-            <div class="filters">
-                <div class="filter-row">
-                    <select id="systemFilter" class="form-control">
-                        <option value="">All Systems</option>
-                        <option value="condensate">Condensate</option>
-                        <option value="feedwater">Feed Water</option>
-                        <option value="sh_rh">SH/RH</option>
-                        <option value="steam">Steam</option>
-                        <option value="cooling">Cooling</option>
-                    </select>
-                    <select id="categoryFilter" class="form-control">
-                        <option value="">All Categories</option>
-                        <option value="pump">Pump</option>
-                        <option value="valve">Valve</option>
-                        <option value="heat_exchanger">Heat Exchanger</option>
-                        <option value="sensor">Sensor</option>
-                        <option value="motor">Motor</option>
-                        <option value="pipe">Pipe</option>
-                    </select>
+                <!-- Valves -->
+                <div class="symbol-category">
+                    <h3>Valves</h3>
+                    <div class="symbol-grid">
+                        <div class="symbol-item" draggable="true" data-symbol="gate-valve">
+                            <svg viewBox="0 0 100 100">
+                                <polygon points="30,30 70,30 50,70" fill="#FF5722" stroke="#333" stroke-width="2"/>
+                                <line x1="50" y1="30" x2="50" y2="15" stroke="#333" stroke-width="2"/>
+                                <rect x="45" y="10" width="10" height="10" fill="#333"/>
+                            </svg>
+                            <div class="label">Gate Valve</div>
+                        </div>
+                        <div class="symbol-item" draggable="true" data-symbol="ball-valve">
+                            <svg viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="25" fill="#9C27B0" stroke="#333" stroke-width="2"/>
+                                <line x1="35" y1="35" x2="65" y2="65" stroke="white" stroke-width="3"/>
+                            </svg>
+                            <div class="label">Ball Valve</div>
+                        </div>
+                        <div class="symbol-item" draggable="true" data-symbol="check-valve">
+                            <svg viewBox="0 0 100 100">
+                                <polygon points="30,40 70,40 70,60 30,60" fill="#607D8B" stroke="#333" stroke-width="2"/>
+                                <polygon points="35,50 55,35 55,65" fill="white"/>
+                            </svg>
+                            <div class="label">Check Valve</div>
+                        </div>
+                    </div>
                 </div>
-                <input type="text" id="searchBox" class="search-box" placeholder="Search by description...">
-            </div>
 
-            <div class="gallery-grid" id="galleryGrid">
-                <!-- Thumbnails will be populated here -->
+                <!-- Vessels & Tanks -->
+                <div class="symbol-category">
+                    <h3>Vessels & Tanks</h3>
+                    <div class="symbol-grid">
+                        <div class="symbol-item" draggable="true" data-symbol="tank">
+                            <svg viewBox="0 0 100 100">
+                                <rect x="25" y="30" width="50" height="40" fill="#795548" stroke="#333" stroke-width="2"/>
+                                <ellipse cx="50" cy="30" rx="25" ry="8" fill="#A1887F" stroke="#333" stroke-width="2"/>
+                            </svg>
+                            <div class="label">Tank</div>
+                        </div>
+                        <div class="symbol-item" draggable="true" data-symbol="vessel">
+                            <svg viewBox="0 0 100 100">
+                                <ellipse cx="50" cy="50" rx="30" ry="35" fill="#8BC34A" stroke="#333" stroke-width="2"/>
+                                <line x1="20" y1="50" x2="80" y2="50" stroke="#333" stroke-width="1"/>
+                            </svg>
+                            <div class="label">Vessel</div>
+                        </div>
+                        <div class="symbol-item" draggable="true" data-symbol="column">
+                            <svg viewBox="0 0 100 100">
+                                <rect x="35" y="15" width="30" height="70" fill="#FF9800" stroke="#333" stroke-width="2"/>
+                                <line x1="25" y1="30" x2="75" y2="30" stroke="#333" stroke-width="2"/>
+                                <line x1="25" y1="50" x2="75" y2="50" stroke="#333" stroke-width="2"/>
+                                <line x1="25" y1="70" x2="75" y2="70" stroke="#333" stroke-width="2"/>
+                            </svg>
+                            <div class="label">Column</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Heat Exchangers -->
+                <div class="symbol-category">
+                    <h3>Heat Exchangers</h3>
+                    <div class="symbol-grid">
+                        <div class="symbol-item" draggable="true" data-symbol="heat-exchanger">
+                            <svg viewBox="0 0 100 100">
+                                <rect x="15" y="30" width="70" height="40" fill="#2196F3" stroke="#333" stroke-width="2"/>
+                                <line x1="15" y1="40" x2="85" y2="60" stroke="white" stroke-width="2"/>
+                                <line x1="15" y1="60" x2="85" y2="40" stroke="white" stroke-width="2"/>
+                            </svg>
+                            <div class="label">Heat Exchanger</div>
+                        </div>
+                        <div class="symbol-item" draggable="true" data-symbol="cooler">
+                            <svg viewBox="0 0 100 100">
+                                <rect x="20" y="35" width="60" height="30" fill="#00BCD4" stroke="#333" stroke-width="2"/>
+                                <path d="M30 45 Q40 35 50 45 Q60 55 70 45" stroke="white" stroke-width="2" fill="none"/>
+                            </svg>
+                            <div class="label">Cooler</div>
+                        </div>
+                        <div class="symbol-item" draggable="true" data-symbol="heater">
+                            <svg viewBox="0 0 100 100">
+                                <rect x="20" y="35" width="60" height="30" fill="#F44336" stroke="#333" stroke-width="2"/>
+                                <path d="M30 45 L40 55 L50 45 L60 55 L70 45" stroke="white" stroke-width="2" fill="none"/>
+                            </svg>
+                            <div class="label">Heater</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instruments -->
+                <div class="symbol-category">
+                    <h3>Instruments</h3>
+                    <div class="symbol-grid">
+                        <div class="symbol-item" draggable="true" data-symbol="temperature">
+                            <svg viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="30" fill="white" stroke="#333" stroke-width="2"/>
+                                <text x="50" y="55" text-anchor="middle" font-size="20" fill="#333">T</text>
+                            </svg>
+                            <div class="label">Temperature</div>
+                        </div>
+                        <div class="symbol-item" draggable="true" data-symbol="pressure">
+                            <svg viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="30" fill="white" stroke="#333" stroke-width="2"/>
+                                <text x="50" y="55" text-anchor="middle" font-size="20" fill="#333">P</text>
+                            </svg>
+                            <div class="label">Pressure</div>
+                        </div>
+                        <div class="symbol-item" draggable="true" data-symbol="flow">
+                            <svg viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="30" fill="white" stroke="#333" stroke-width="2"/>
+                                <text x="50" y="55" text-anchor="middle" font-size="20" fill="#333">F</text>
+                            </svg>
+                            <div class="label">Flow</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -474,76 +682,143 @@
             </div>
         </div>
 
-        <!-- Right Panel: Asset Binding -->
+        <!-- Right Panel: Asset Binding Form -->
         <div class="right-panel">
             <div class="panel-header">
                 <i class="pi pi-link"></i> Asset Binding
             </div>
 
-            <div id="assetBindingPanel" class="asset-binding">
-                <div class="binding-section">
-                    <h4>Selected Symbol</h4>
-                    <div id="selectedSymbolInfo">No symbol selected</div>
-                </div>
-
-                <div class="binding-section">
-                    <h4>Asset Assignment</h4>
-                    <select id="assetDropdown" class="form-control">
-                        <option value="">Select Asset</option>
-                        <option value="CP-101">CP-101 - Condensate Pump</option>
-                        <option value="FW-201">FW-201 - Feed Water Pump</option>
-                        <option value="HX-301">HX-301 - Heat Exchanger</option>
-                        <option value="VLV-401">VLV-401 - Control Valve</option>
-                        <option value="SEN-501">SEN-501 - Temperature Sensor</option>
-                    </select>
-                </div>
-
-                <div class="binding-section">
-                    <h4>Telemetry Tags</h4>
-                    <div class="tag-list" id="telemetryTags">
-                        <div class="tag-item" data-tag="temperature">Temperature (°C)</div>
-                        <div class="tag-item" data-tag="pressure">Pressure (Bar)</div>
-                        <div class="tag-item" data-tag="flow">Flow Rate (L/min)</div>
-                        <div class="tag-item" data-tag="vibration">Vibration (mm/s)</div>
-                        <div class="tag-item" data-tag="status">Operational Status</div>
+            <div style="padding: 1rem; flex: 1;">
+                <div id="assetBindingForm" style="display: none;">
+                    <div class="form-group">
+                        <label>Selected Symbol</label>
+                        <div id="selectedSymbolInfo" style="background: #f8f9fa; padding: 0.75rem; border-radius: 4px; font-size: 0.9rem; color: #666;">
+                            No symbol selected
+                        </div>
                     </div>
-                </div>
 
-                <div class="binding-section">
-                    <h4>Real-time Display</h4>
-                    <label style="font-size: 0.9rem;">
-                        <input type="checkbox" id="enableRealTime"> Enable Real-time Updates
-                    </label>
-                    <div class="metadata-display" id="bindingPreview">
-                        Binding preview will appear here
+                    <div class="form-group">
+                        <label for="assetDropdown">Asset Assignment</label>
+                        <select id="assetDropdown" class="form-control">
+                            <option value="">Select Asset</option>
+                            <optgroup label="Pumps">
+                                <option value="CP-101">CP-101 - Condensate Pump</option>
+                                <option value="FW-201">FW-201 - Feed Water Pump</option>
+                                <option value="BFP-301">BFP-301 - Boiler Feed Pump</option>
+                            </optgroup>
+                            <optgroup label="Valves">
+                                <option value="VLV-401">VLV-401 - Control Valve</option>
+                                <option value="VLV-402">VLV-402 - Isolation Valve</option>
+                                <option value="PRV-501">PRV-501 - Pressure Relief Valve</option>
+                            </optgroup>
+                            <optgroup label="Heat Exchangers">
+                                <option value="HX-301">HX-301 - Feed Water Heater</option>
+                                <option value="HX-302">HX-302 - Condenser</option>
+                                <option value="HX-303">HX-303 - Economizer</option>
+                            </optgroup>
+                            <optgroup label="Instruments">
+                                <option value="TE-601">TE-601 - Temperature Element</option>
+                                <option value="PE-602">PE-602 - Pressure Element</option>
+                                <option value="FE-603">FE-603 - Flow Element</option>
+                            </optgroup>
+                        </select>
                     </div>
+
+                    <div class="form-group">
+                        <label for="tagDropdown">Telemetry Tag</label>
+                        <select id="tagDropdown" class="form-control">
+                            <option value="">Select Tag</option>
+                            <optgroup label="Temperature Tags">
+                                <option value="CP-101.TEMP">CP-101.Temperature</option>
+                                <option value="FW-201.TEMP">FW-201.Temperature</option>
+                                <option value="HX-301.TEMP_IN">HX-301.Inlet Temperature</option>
+                                <option value="HX-301.TEMP_OUT">HX-301.Outlet Temperature</option>
+                            </optgroup>
+                            <optgroup label="Pressure Tags">
+                                <option value="CP-101.PRESS">CP-101.Pressure</option>
+                                <option value="FW-201.PRESS">FW-201.Pressure</option>
+                                <option value="VLV-401.PRESS_UP">VLV-401.Upstream Pressure</option>
+                                <option value="VLV-401.PRESS_DN">VLV-401.Downstream Pressure</option>
+                            </optgroup>
+                            <optgroup label="Flow Tags">
+                                <option value="CP-101.FLOW">CP-101.Flow Rate</option>
+                                <option value="FW-201.FLOW">FW-201.Flow Rate</option>
+                                <option value="HX-301.FLOW">HX-301.Flow Rate</option>
+                            </optgroup>
+                            <optgroup label="Status Tags">
+                                <option value="CP-101.STATUS">CP-101.Status</option>
+                                <option value="VLV-401.POSITION">VLV-401.Position</option>
+                                <option value="HX-301.STATUS">HX-301.Status</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="systemType">System Type</label>
+                        <select id="systemType" class="form-control">
+                            <option value="">Select System</option>
+                            <option value="condensate">Condensate System</option>
+                            <option value="feedwater">Feed Water System</option>
+                            <option value="steam">Steam System</option>
+                            <option value="cooling">Cooling Water System</option>
+                            <option value="fuel">Fuel System</option>
+                            <option value="air">Air System</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" id="enableRealTime">
+                            Enable Real-time Updates
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Alarm Thresholds</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                            <input type="number" id="lowThreshold" class="form-control" placeholder="Low" style="font-size: 0.8rem;">
+                            <input type="number" id="highThreshold" class="form-control" placeholder="High" style="font-size: 0.8rem;">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" class="form-control" rows="2" placeholder="Add description or notes..."></textarea>
+                    </div>
+
+                    <button class="btn btn-success" onclick="applyBinding()" style="width: 100%; margin-bottom: 1rem;">
+                        <i class="pi pi-check"></i> Apply Binding
+                    </button>
+
+                    <button class="btn" onclick="clearBinding()" style="width: 100%;">
+                        <i class="pi pi-times"></i> Clear Binding
+                    </button>
                 </div>
 
-                <button class="btn btn-success" onclick="applyBinding()" style="width: 100%; margin-top: 1rem;">
-                    Apply Binding
-                </button>
-            </div>
-
-            <div id="noSelectionPanel" style="padding: 2rem; text-align: center; color: #666;">
-                <i class="pi pi-info-circle" style="font-size: 2rem; margin-bottom: 1rem;"></i>
-                <div>Select a symbol on the canvas to configure asset binding</div>
+                <div id="noSelectionPanel" style="text-align: center; color: #666; padding: 2rem 0;">
+                    <i class="pi pi-info-circle" style="font-size: 2.5rem; margin-bottom: 1rem; color: #ccc;"></i>
+                    <h4 style="color: #999; margin: 0 0 0.5rem 0;">No Symbol Selected</h4>
+                    <p style="font-size: 0.9rem; margin: 0;">Click on a symbol in the canvas to configure its asset binding.</p>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
         // Global variables
-        let stage, layer;
+        let stage, layer, connectLayer;
         let currentTool = 'select';
         let selectedShape = null;
-        let graphicLibrary = [];
-        let draggedSymbol = null;
+        let isDrawingMode = false;
+        let connectionStart = null;
+        let connections = [];
+        let symbolCounter = 0;
 
         // Initialize application
         document.addEventListener('DOMContentLoaded', function() {
             initializeCanvas();
             setupEventListeners();
-            loadSampleData();
+            loadExampleDiagram();
             updateAssetBindingPanel();
         });
 
@@ -558,8 +833,11 @@
                 draggable: false
             });
 
+            // Create layers
             layer = new Konva.Layer();
+            connectLayer = new Konva.Layer();
             stage.add(layer);
+            stage.add(connectLayer);
 
             // Handle window resize
             window.addEventListener('resize', () => {
@@ -570,179 +848,249 @@
 
             // Handle canvas clicks
             stage.on('click', (e) => {
-                if (e.target === stage) {
+                if (isDrawingMode) {
+                    handleConnectionClick(e);
+                } else if (e.target === stage) {
                     selectShape(null);
                 } else {
                     selectShape(e.target);
                 }
             });
 
-            // Handle drag and drop from gallery
+            // Handle drag and drop from symbol library
             stage.on('dragover', (e) => {
                 e.evt.preventDefault();
             });
 
             stage.on('drop', (e) => {
                 e.evt.preventDefault();
-                if (draggedSymbol) {
-                    addSymbolToCanvas(draggedSymbol, stage.getPointerPosition());
-                    draggedSymbol = null;
+                const symbolType = e.evt.dataTransfer.getData('text/plain');
+                if (symbolType) {
+                    addSymbolToCanvas(symbolType, stage.getPointerPosition());
                 }
             });
         }
 
         function setupEventListeners() {
-            // Upload zone
-            const uploadZone = document.getElementById('uploadZone');
-            const fileInput = document.getElementById('fileInput');
-
-            uploadZone.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                uploadZone.classList.add('dragover');
+            // P&ID Symbol library drag and drop
+            const symbolItems = document.querySelectorAll('.symbol-item');
+            symbolItems.forEach(item => {
+                item.addEventListener('dragstart', (e) => {
+                    const symbolType = e.target.closest('.symbol-item').getAttribute('data-symbol');
+                    e.dataTransfer.setData('text/plain', symbolType);
+                    e.dataTransfer.effectAllowed = 'copy';
+                });
             });
 
-            uploadZone.addEventListener('dragleave', () => {
-                uploadZone.classList.remove('dragover');
-            });
-
-            uploadZone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadZone.classList.remove('dragover');
-                handleFileUpload(e.dataTransfer.files);
-            });
-
-            fileInput.addEventListener('change', (e) => {
-                handleFileUpload(e.target.files);
-            });
-
-            // Filters
-            document.getElementById('systemFilter').addEventListener('change', filterGallery);
-            document.getElementById('categoryFilter').addEventListener('change', filterGallery);
-            document.getElementById('searchBox').addEventListener('input', filterGallery);
-
-            // Telemetry tags
-            document.getElementById('telemetryTags').addEventListener('click', (e) => {
-                if (e.target.classList.contains('tag-item')) {
-                    e.target.classList.toggle('selected');
-                    updateBindingPreview();
-                }
-            });
-
-            // Asset dropdown
+            // Asset binding form events
             document.getElementById('assetDropdown').addEventListener('change', updateBindingPreview);
+            document.getElementById('tagDropdown').addEventListener('change', updateBindingPreview);
+            document.getElementById('systemType').addEventListener('change', updateBindingPreview);
             document.getElementById('enableRealTime').addEventListener('change', updateBindingPreview);
         }
 
-        function handleFileUpload(files) {
-            const systemType = document.getElementById('systemType').value;
-            const tagCategory = document.getElementById('tagCategory').value;
-            const description = document.getElementById('description').value;
+        // Create P&ID symbol on canvas
+        function addSymbolToCanvas(symbolType, position) {
+            symbolCounter++;
+            const symbolId = `${symbolType}-${symbolCounter}`;
+            
+            // Create the symbol based on type
+            const symbol = createPIDSymbol(symbolType, position || { x: 150, y: 150 });
+            symbol.setAttr('symbolType', symbolType);
+            symbol.setAttr('symbolId', symbolId);
+            symbol.setAttr('name', 'symbol');
+            symbol.draggable(true);
 
-            if (!systemType || !tagCategory) {
-                showNotification('Please select System Type and Tag Category before uploading.', 'warning');
-                return;
+            // Snap to grid if enabled
+            if (document.getElementById('snapToGrid').checked) {
+                symbol.on('dragmove', snapToGrid);
             }
 
-            Array.from(files).forEach(file => {
-                if (file.type.startsWith('image/') || file.name.endsWith('.svg')) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const graphic = {
-                            id: Date.now() + Math.random(),
-                            name: file.name,
-                            systemType: systemType,
-                            tagCategory: tagCategory,
-                            description: description,
-                            dataUrl: e.target.result,
-                            type: file.type.includes('svg') ? 'svg' : 'image'
-                        };
-                        
-                        graphicLibrary.push(graphic);
-                        addThumbnailToGallery(graphic);
-                        showNotification(`${file.name} uploaded successfully!`);
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
+            // Add connection points
+            addConnectionPoints(symbol);
 
-            // Clear form
-            document.getElementById('systemType').value = '';
-            document.getElementById('tagCategory').value = '';
-            document.getElementById('description').value = '';
+            layer.add(symbol);
+            layer.draw();
+
+            // Select the newly added symbol
+            selectShape(symbol);
+            
+            updateCanvasStatus(`Added ${symbolType} to canvas`);
         }
 
-        function addThumbnailToGallery(graphic) {
-            const gallery = document.getElementById('galleryGrid');
-            const item = document.createElement('div');
-            item.className = 'gallery-item';
-            item.dataset.id = graphic.id;
-            item.dataset.system = graphic.systemType;
-            item.dataset.category = graphic.tagCategory;
-            item.draggable = true;
-
-            const img = document.createElement('img');
-            img.src = graphic.dataUrl;
-            img.alt = graphic.name;
-
-            const label = document.createElement('div');
-            label.className = 'label';
-            label.textContent = graphic.name.split('.')[0];
-
-            const metadata = document.createElement('div');
-            metadata.className = 'metadata-display';
-            metadata.innerHTML = `${graphic.systemType} | ${graphic.tagCategory}`;
-
-            item.appendChild(img);
-            item.appendChild(label);
-            item.appendChild(metadata);
-
-            // Drag events
-            item.addEventListener('dragstart', (e) => {
-                draggedSymbol = graphic;
-                e.dataTransfer.effectAllowed = 'copy';
+        // Create P&ID symbol graphics
+        function createPIDSymbol(type, position) {
+            const group = new Konva.Group({
+                x: position.x,
+                y: position.y
             });
 
-            item.addEventListener('click', () => {
-                document.querySelectorAll('.gallery-item').forEach(i => i.classList.remove('selected'));
-                item.classList.add('selected');
-            });
+            switch(type) {
+                case 'centrifugal-pump':
+                    const pumpCircle = new Konva.Circle({
+                        radius: 35,
+                        fill: '#4CAF50',
+                        stroke: '#333',
+                        strokeWidth: 2
+                    });
+                    const pumpCross = new Konva.Shape({
+                        sceneFunc: function (context, shape) {
+                            context.beginPath();
+                            context.moveTo(-25, 0);
+                            context.lineTo(25, 0);
+                            context.moveTo(0, -25);
+                            context.lineTo(0, 25);
+                            context.fillStrokeShape(shape);
+                        },
+                        stroke: 'white',
+                        strokeWidth: 2
+                    });
+                    group.add(pumpCircle, pumpCross);
+                    break;
 
-            gallery.appendChild(item);
+                case 'gate-valve':
+                    const valveBody = new Konva.RegularPolygon({
+                        sides: 3,
+                        radius: 25,
+                        fill: '#FF5722',
+                        stroke: '#333',
+                        strokeWidth: 2,
+                        rotation: 180
+                    });
+                    const valveStem = new Konva.Line({
+                        points: [0, -25, 0, -40],
+                        stroke: '#333',
+                        strokeWidth: 2
+                    });
+                    const valveHandle = new Konva.Rect({
+                        x: -5,
+                        y: -45,
+                        width: 10,
+                        height: 10,
+                        fill: '#333'
+                    });
+                    group.add(valveBody, valveStem, valveHandle);
+                    break;
+
+                case 'tank':
+                    const tankBody = new Konva.Rect({
+                        x: -25,
+                        y: -20,
+                        width: 50,
+                        height: 40,
+                        fill: '#795548',
+                        stroke: '#333',
+                        strokeWidth: 2
+                    });
+                    const tankTop = new Konva.Ellipse({
+                        radiusX: 25,
+                        radiusY: 8,
+                        y: -20,
+                        fill: '#A1887F',
+                        stroke: '#333',
+                        strokeWidth: 2
+                    });
+                    group.add(tankBody, tankTop);
+                    break;
+
+                case 'heat-exchanger':
+                    const hxBody = new Konva.Rect({
+                        x: -35,
+                        y: -20,
+                        width: 70,
+                        height: 40,
+                        fill: '#2196F3',
+                        stroke: '#333',
+                        strokeWidth: 2
+                    });
+                    const hxLine1 = new Konva.Line({
+                        points: [-35, -10, 35, 10],
+                        stroke: 'white',
+                        strokeWidth: 2
+                    });
+                    const hxLine2 = new Konva.Line({
+                        points: [-35, 10, 35, -10],
+                        stroke: 'white',
+                        strokeWidth: 2
+                    });
+                    group.add(hxBody, hxLine1, hxLine2);
+                    break;
+
+                case 'temperature':
+                    const tempCircle = new Konva.Circle({
+                        radius: 30,
+                        fill: 'white',
+                        stroke: '#333',
+                        strokeWidth: 2
+                    });
+                    const tempText = new Konva.Text({
+                        text: 'T',
+                        fontSize: 20,
+                        fill: '#333',
+                        x: -7,
+                        y: -10
+                    });
+                    group.add(tempCircle, tempText);
+                    break;
+
+                case 'pressure':
+                    const pressCircle = new Konva.Circle({
+                        radius: 30,
+                        fill: 'white',
+                        stroke: '#333',
+                        strokeWidth: 2
+                    });
+                    const pressText = new Konva.Text({
+                        text: 'P',
+                        fontSize: 20,
+                        fill: '#333',
+                        x: -7,
+                        y: -10
+                    });
+                    group.add(pressCircle, pressText);
+                    break;
+
+                // Add more symbol types as needed
+                default:
+                    const defaultShape = new Konva.Rect({
+                        width: 60,
+                        height: 40,
+                        fill: '#ddd',
+                        stroke: '#333',
+                        strokeWidth: 2,
+                        x: -30,
+                        y: -20
+                    });
+                    group.add(defaultShape);
+            }
+
+            return group;
         }
 
-        function addSymbolToCanvas(graphic, position) {
-            const img = new Image();
-            img.onload = function() {
-                const konvaImage = new Konva.Image({
-                    x: position ? position.x - 50 : 100,
-                    y: position ? position.y - 50 : 100,
-                    image: img,
-                    width: 100,
-                    height: 100,
-                    draggable: true,
-                    name: 'symbol'
+        // Add connection points to symbols
+        function addConnectionPoints(symbol) {
+            const connectionPoints = [
+                { x: -40, y: 0, id: 'left' },
+                { x: 40, y: 0, id: 'right' },
+                { x: 0, y: -40, id: 'top' },
+                { x: 0, y: 40, id: 'bottom' }
+            ];
+
+            connectionPoints.forEach(point => {
+                const connector = new Konva.Circle({
+                    x: point.x,
+                    y: point.y,
+                    radius: 4,
+                    fill: '#667eea',
+                    stroke: 'white',
+                    strokeWidth: 2,
+                    visible: false,
+                    name: 'connector',
+                    connectionId: point.id
                 });
 
-                // Add custom properties
-                konvaImage.setAttr('graphicId', graphic.id);
-                konvaImage.setAttr('graphicName', graphic.name);
-                konvaImage.setAttr('systemType', graphic.systemType);
-                konvaImage.setAttr('tagCategory', graphic.tagCategory);
-
-                // Snap to grid if enabled
-                if (document.getElementById('snapToGrid').checked) {
-                    konvaImage.on('dragmove', snapToGrid);
-                }
-
-                layer.add(konvaImage);
-                layer.draw();
-
-                // Select the newly added symbol
-                selectShape(konvaImage);
-                
-                updateCanvasStatus(`Added ${graphic.name} to canvas`);
-            };
-            img.src = graphic.dataUrl;
+                symbol.add(connector);
+            });
         }
 
         function selectShape(shape) {
@@ -769,40 +1117,46 @@
         }
 
         function updateAssetBindingPanel(shape = null) {
-            const bindingPanel = document.getElementById('assetBindingPanel');
+            const bindingForm = document.getElementById('assetBindingForm');
             const noSelectionPanel = document.getElementById('noSelectionPanel');
 
-            if (shape) {
-                bindingPanel.style.display = 'block';
+            if (shape && shape.name() === 'symbol') {
+                bindingForm.style.display = 'block';
                 noSelectionPanel.style.display = 'none';
 
+                // Show connection points when selected
+                const connectors = shape.find('.connector');
+                connectors.forEach(connector => connector.visible(true));
+
                 document.getElementById('selectedSymbolInfo').innerHTML = `
-                    <strong>${shape.getAttr('graphicName')}</strong><br>
-                    <small>System: ${shape.getAttr('systemType')} | Category: ${shape.getAttr('tagCategory')}</small>
+                    <strong>${shape.getAttr('symbolId') || 'Unknown Symbol'}</strong><br>
+                    <small>Type: ${shape.getAttr('symbolType') || 'Unknown'}</small>
                 `;
+
+                // Pre-fill bound data if exists
+                const boundAsset = shape.getAttr('boundAsset');
+                const boundTag = shape.getAttr('boundTag');
+                const boundSystem = shape.getAttr('boundSystem');
+                
+                if (boundAsset) document.getElementById('assetDropdown').value = boundAsset;
+                if (boundTag) document.getElementById('tagDropdown').value = boundTag;
+                if (boundSystem) document.getElementById('systemType').value = boundSystem;
+                
+                document.getElementById('enableRealTime').checked = shape.getAttr('realTimeEnabled') || false;
             } else {
-                bindingPanel.style.display = 'none';
+                bindingForm.style.display = 'none';
                 noSelectionPanel.style.display = 'block';
+
+                // Hide all connection points
+                layer.find('.connector').forEach(connector => connector.visible(false));
             }
+            
+            layer.draw();
         }
 
         function updateBindingPreview() {
-            const asset = document.getElementById('assetDropdown').value;
-            const selectedTags = Array.from(document.querySelectorAll('.tag-item.selected')).map(tag => tag.dataset.tag);
-            const realTime = document.getElementById('enableRealTime').checked;
-
-            let preview = '';
-            if (asset) {
-                preview += `<strong>Asset:</strong> ${asset}<br>`;
-            }
-            if (selectedTags.length > 0) {
-                preview += `<strong>Tags:</strong> ${selectedTags.join(', ')}<br>`;
-            }
-            if (realTime) {
-                preview += `<strong>Real-time:</strong> Enabled`;
-            }
-
-            document.getElementById('bindingPreview').innerHTML = preview || 'Configure binding settings above';
+            // This function can be used to show live preview of binding settings
+            // For now, it's just a placeholder for future functionality
         }
 
         function applyBinding() {
@@ -812,24 +1166,38 @@
             }
 
             const asset = document.getElementById('assetDropdown').value;
-            const selectedTags = Array.from(document.querySelectorAll('.tag-item.selected')).map(tag => tag.dataset.tag);
+            const tag = document.getElementById('tagDropdown').value;
+            const system = document.getElementById('systemType').value;
             const realTime = document.getElementById('enableRealTime').checked;
+            const lowThreshold = document.getElementById('lowThreshold').value;
+            const highThreshold = document.getElementById('highThreshold').value;
+            const description = document.getElementById('description').value;
 
-            if (!asset || selectedTags.length === 0) {
-                showNotification('Please select an asset and at least one telemetry tag.', 'warning');
+            if (!asset || !tag) {
+                showNotification('Please select both an asset and a telemetry tag.', 'warning');
                 return;
             }
 
             // Store binding data
             selectedShape.setAttr('boundAsset', asset);
-            selectedShape.setAttr('boundTags', selectedTags);
+            selectedShape.setAttr('boundTag', tag);
+            selectedShape.setAttr('boundSystem', system);
             selectedShape.setAttr('realTimeEnabled', realTime);
+            selectedShape.setAttr('lowThreshold', lowThreshold);
+            selectedShape.setAttr('highThreshold', highThreshold);
+            selectedShape.setAttr('description', description);
 
             // Add visual indicator for bound symbols
             if (realTime) {
+                // Remove existing indicator
+                const existingIndicator = selectedShape.findOne('.realtime-indicator');
+                if (existingIndicator) {
+                    existingIndicator.destroy();
+                }
+
                 const indicator = new Konva.Circle({
-                    x: selectedShape.x() + selectedShape.width() - 10,
-                    y: selectedShape.y() + 10,
+                    x: 35,
+                    y: -35,
                     radius: 4,
                     fill: '#28a745',
                     name: 'realtime-indicator'
@@ -841,29 +1209,135 @@
                 }, layer);
                 anim.start();
 
-                layer.add(indicator);
+                selectedShape.add(indicator);
             }
 
             layer.draw();
-            showNotification(`Binding applied: ${asset} with ${selectedTags.length} tag(s)`);
+            showNotification(`Binding applied: ${asset} → ${tag}`);
         }
 
-        function filterGallery() {
-            const systemFilter = document.getElementById('systemFilter').value;
-            const categoryFilter = document.getElementById('categoryFilter').value;
-            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+        function clearBinding() {
+            if (!selectedShape) {
+                showNotification('Please select a symbol first.', 'warning');
+                return;
+            }
 
-            document.querySelectorAll('.gallery-item').forEach(item => {
-                const system = item.dataset.system;
-                const category = item.dataset.category;
-                const text = item.textContent.toLowerCase();
+            // Clear binding data
+            selectedShape.setAttr('boundAsset', null);
+            selectedShape.setAttr('boundTag', null);
+            selectedShape.setAttr('boundSystem', null);
+            selectedShape.setAttr('realTimeEnabled', false);
+            selectedShape.setAttr('lowThreshold', null);
+            selectedShape.setAttr('highThreshold', null);
+            selectedShape.setAttr('description', null);
 
-                const matchesSystem = !systemFilter || system === systemFilter;
-                const matchesCategory = !categoryFilter || category === categoryFilter;
-                const matchesSearch = !searchTerm || text.includes(searchTerm);
+            // Remove indicator
+            const indicator = selectedShape.findOne('.realtime-indicator');
+            if (indicator) {
+                indicator.destroy();
+            }
 
-                item.style.display = matchesSystem && matchesCategory && matchesSearch ? 'block' : 'none';
+            // Clear form
+            document.getElementById('assetDropdown').value = '';
+            document.getElementById('tagDropdown').value = '';
+            document.getElementById('systemType').value = '';
+            document.getElementById('enableRealTime').checked = false;
+            document.getElementById('lowThreshold').value = '';
+            document.getElementById('highThreshold').value = '';
+            document.getElementById('description').value = '';
+
+            layer.draw();
+            showNotification('Binding cleared');
+        }
+
+        // Toolbar functions
+        function saveLayout() {
+            const layoutData = {
+                symbols: [],
+                connections: connections,
+                timestamp: new Date().toISOString()
+            };
+
+            // Collect symbol data
+            layer.find('.symbol').forEach(symbol => {
+                layoutData.symbols.push({
+                    id: symbol.getAttr('symbolId'),
+                    type: symbol.getAttr('symbolType'),
+                    x: symbol.x(),
+                    y: symbol.y(),
+                    boundAsset: symbol.getAttr('boundAsset'),
+                    boundTag: symbol.getAttr('boundTag'),
+                    boundSystem: symbol.getAttr('boundSystem'),
+                    realTimeEnabled: symbol.getAttr('realTimeEnabled'),
+                    description: symbol.getAttr('description')
+                });
             });
+
+            // Save to localStorage (in a real app, this would go to Firestore)
+            localStorage.setItem('pid_layout', JSON.stringify(layoutData));
+            showNotification('Layout saved successfully!');
+        }
+
+        function previewLive() {
+            // Toggle real-time simulation
+            const boundSymbols = layer.find('.symbol').filter(symbol => symbol.getAttr('realTimeEnabled'));
+            
+            if (boundSymbols.length === 0) {
+                showNotification('No symbols with real-time data enabled. Please bind some symbols first.', 'warning');
+                return;
+            }
+
+            showNotification(`Preview mode activated for ${boundSymbols.length} symbols`);
+            
+            // Start real-time simulation for bound symbols
+            boundSymbols.forEach(symbol => {
+                simulateRealTimeData(symbol);
+            });
+        }
+
+        function exportDiagram() {
+            // Export canvas as image
+            const dataURL = stage.toDataURL({ pixelRatio: 2 });
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.download = `pid-diagram-${new Date().toISOString().split('T')[0]}.png`;
+            link.href = dataURL;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification('Diagram exported as PNG');
+        }
+
+        function toggleDrawingMode() {
+            isDrawingMode = !isDrawingMode;
+            const btn = document.getElementById('drawingMode');
+            
+            if (isDrawingMode) {
+                btn.classList.add('primary');
+                btn.innerHTML = '<i class="pi pi-times"></i> Exit Connect';
+                updateCanvasStatus('Connection mode: Click on symbols to connect them');
+            } else {
+                btn.classList.remove('primary');
+                btn.innerHTML = '<i class="pi pi-pencil"></i> Connect';
+                connectionStart = null;
+                updateCanvasStatus('Selection mode: Click on symbols to configure');
+            }
+        }
+
+        function clearCanvas() {
+            if (confirm('Are you sure you want to clear the entire canvas?')) {
+                layer.destroyChildren();
+                connectLayer.destroyChildren();
+                connections = [];
+                selectedShape = null;
+                symbolCounter = 0;
+                updateAssetBindingPanel();
+                layer.draw();
+                connectLayer.draw();
+                showNotification('Canvas cleared');
+            }
         }
 
         function setTool(tool) {
@@ -925,83 +1399,121 @@
             }, 3000);
         }
 
-        function loadSampleData() {
-            // Add some sample graphics for demonstration
-            const sampleGraphics = [
-                {
-                    id: 1,
-                    name: 'Pump-01.svg',
-                    systemType: 'condensate',
-                    tagCategory: 'pump',
-                    description: 'Condensate pump symbol',
-                    dataUrl: 'data:image/svg+xml;base64,' + btoa(`
-                        <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="50" cy="50" r="40" fill="#4CAF50" stroke="#333" stroke-width="2"/>
-                            <text x="50" y="55" text-anchor="middle" fill="white" font-size="12">PUMP</text>
-                        </svg>
-                    `),
-                    type: 'svg'
-                },
-                {
-                    id: 2,
-                    name: 'Valve-01.svg',
-                    systemType: 'feedwater',
-                    tagCategory: 'valve',
-                    description: 'Control valve symbol',
-                    dataUrl: 'data:image/svg+xml;base64,' + btoa(`
-                        <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
-                            <polygon points="20,20 80,20 50,80" fill="#FF9800" stroke="#333" stroke-width="2"/>
-                            <text x="50" y="40" text-anchor="middle" fill="white" font-size="10">VALVE</text>
-                        </svg>
-                    `),
-                    type: 'svg'
-                },
-                {
-                    id: 3,
-                    name: 'HeatExchanger-01.svg',
-                    systemType: 'sh_rh',
-                    tagCategory: 'heat_exchanger',
-                    description: 'Heat exchanger symbol',
-                    dataUrl: 'data:image/svg+xml;base64,' + btoa(`
-                        <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="15" y="30" width="70" height="40" fill="#2196F3" stroke="#333" stroke-width="2"/>
-                            <line x1="15" y1="40" x2="85" y2="60" stroke="white" stroke-width="2"/>
-                            <line x1="15" y1="60" x2="85" y2="40" stroke="white" stroke-width="2"/>
-                            <text x="50" y="55" text-anchor="middle" fill="white" font-size="8">HX</text>
-                        </svg>
-                    `),
-                    type: 'svg'
-                }
-            ];
+        // Connection handling
+        function handleConnectionClick(e) {
+            if (e.target.name() !== 'symbol') return;
 
-            sampleGraphics.forEach(graphic => {
-                graphicLibrary.push(graphic);
-                addThumbnailToGallery(graphic);
-            });
+            const symbol = e.target;
+            
+            if (!connectionStart) {
+                connectionStart = symbol;
+                symbol.stroke('#FF5722');
+                symbol.strokeWidth(3);
+                layer.draw();
+                updateCanvasStatus('Select target symbol to connect');
+            } else if (connectionStart !== symbol) {
+                createConnection(connectionStart, symbol);
+                connectionStart.stroke('#667eea');
+                connectionStart.strokeWidth(2);
+                connectionStart = null;
+                updateCanvasStatus('Connection created! Click symbols to create more connections');
+                layer.draw();
+            }
         }
 
-        // Simulate real-time data updates
+        function createConnection(startSymbol, endSymbol) {
+            const startPos = startSymbol.getAbsolutePosition();
+            const endPos = endSymbol.getAbsolutePosition();
+
+            const line = new Konva.Line({
+                points: [startPos.x, startPos.y, endPos.x, endPos.y],
+                stroke: '#333',
+                strokeWidth: 3,
+                name: 'connection'
+            });
+
+            connectLayer.add(line);
+            connectLayer.draw();
+
+            // Store connection data
+            connections.push({
+                id: `conn-${connections.length + 1}`,
+                start: startSymbol.getAttr('symbolId'),
+                end: endSymbol.getAttr('symbolId'),
+                line: line
+            });
+
+            showNotification(`Connected ${startSymbol.getAttr('symbolId')} to ${endSymbol.getAttr('symbolId')}`);
+        }
+
+        // Real-time data simulation
+        function simulateRealTimeData(symbol) {
+            const tag = symbol.getAttr('boundTag');
+            const lowThreshold = parseFloat(symbol.getAttr('lowThreshold')) || 0;
+            const highThreshold = parseFloat(symbol.getAttr('highThreshold')) || 100;
+
+            // Simulate sensor reading
+            const value = Math.random() * (highThreshold - lowThreshold) + lowThreshold;
+            
+            // Color coding based on thresholds
+            if (value > highThreshold * 0.9) {
+                symbol.opacity(0.8);
+                symbol.getChildren().forEach(child => {
+                    if (child.fill) child.fill('#FF5722'); // Red for high
+                });
+            } else if (value < lowThreshold * 1.1) {
+                symbol.opacity(0.8);
+                symbol.getChildren().forEach(child => {
+                    if (child.fill) child.fill('#2196F3'); // Blue for low
+                });
+            } else {
+                symbol.opacity(1);
+                symbol.getChildren().forEach(child => {
+                    if (child.fill && child.name() !== 'realtime-indicator') {
+                        // Reset to original colors based on symbol type
+                        const symbolType = symbol.getAttr('symbolType');
+                        switch(symbolType) {
+                            case 'centrifugal-pump':
+                                child.fill('#4CAF50');
+                                break;
+                            case 'gate-valve':
+                                child.fill('#FF5722');
+                                break;
+                            case 'tank':
+                                child.fill('#795548');
+                                break;
+                            case 'heat-exchanger':
+                                child.fill('#2196F3');
+                                break;
+                            default:
+                                child.fill('#ddd');
+                        }
+                    }
+                });
+            }
+            
+            layer.draw();
+        }
+
+        // Load example P&ID diagram
+        function loadExampleDiagram() {
+            // Create example symbols to demonstrate the interface
+            setTimeout(() => {
+                addSymbolToCanvas('centrifugal-pump', { x: 200, y: 200 });
+                setTimeout(() => addSymbolToCanvas('gate-valve', { x: 350, y: 200 }), 500);
+                setTimeout(() => addSymbolToCanvas('heat-exchanger', { x: 500, y: 200 }), 1000);
+                setTimeout(() => addSymbolToCanvas('tank', { x: 650, y: 200 }), 1500);
+                setTimeout(() => addSymbolToCanvas('temperature', { x: 500, y: 100 }), 2000);
+            }, 1000);
+        }
+
+        // Auto real-time data updates
         setInterval(() => {
             const boundSymbols = layer.find('.symbol').filter(shape => shape.getAttr('realTimeEnabled'));
             boundSymbols.forEach(symbol => {
-                // Simulate temperature changes with color coding
-                const temp = Math.random() * 100;
-                if (temp > 80) {
-                    symbol.saturation(0.8);
-                    symbol.red(1);
-                    symbol.green(0.2);
-                    symbol.blue(0.2);
-                } else if (temp > 60) {
-                    symbol.saturation(0.5);
-                    symbol.red(1);
-                    symbol.green(0.8);
-                    symbol.blue(0.2);
-                } else {
-                    symbol.saturation(0);
-                }
+                simulateRealTimeData(symbol);
             });
-            layer.draw();
-        }, 2000);
+        }, 3000);
     </script>
 </body>
 </html>

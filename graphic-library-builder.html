@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graphic Library Builder - Digital Twin Configuration</title>
+    
+    <!-- PrimeNG CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/primeng@17.3.2/resources/themes/lara-light-blue/theme.css">
+    <link rel="stylesheet" href="https://unpkg.com/primeng@17.3.2/resources/primeng.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/primeicons@6.0.1/primeicons.css">
+    
+    <!-- Angular CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/@angular/cdk@17.1.0/overlay-prebuilt.css">
+    
+    <!-- Konva.js for Canvas -->
+    <script src="https://unpkg.com/konva@9.2.0/konva.min.js"></script>
+    
+    <!-- Custom Styles -->
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 350px 1fr 300px;
+            grid-template-rows: 1fr;
+            height: calc(100vh - 80px);
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        .left-panel {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .canvas-area {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .right-panel {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            background: #f1f3f4;
+            padding: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .upload-zone {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            margin: 1rem;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .upload-zone:hover,
+        .upload-zone.dragover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .upload-zone i {
+            font-size: 3rem;
+            color: #999;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #5a6fd8;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .gallery-item {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .gallery-item:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .gallery-item.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 80px;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+
+        .gallery-item .label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .canvas-toolbar {
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 0.5rem 1rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .tool-btn {
+            background: none;
+            border: 1px solid #ddd;
+            padding: 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tool-btn:hover,
+        .tool-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .asset-binding {
+            padding: 1rem;
+            display: none;
+        }
+
+        .asset-binding.active {
+            display: block;
+        }
+
+        .binding-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .binding-section h4 {
+            margin: 0 0 0.5rem 0;
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .tag-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .tag-item {
+            padding: 0.5rem;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .tag-item:hover {
+            background: #f0f4ff;
+        }
+
+        .tag-item.selected {
+            background: #667eea;
+            color: white;
+        }
+
+        .filters {
+            padding: 1rem;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .status-bar {
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #konva-container {
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            background-image: 
+                radial-gradient(circle, #ddd 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .metadata-display {
+            background: #f8f9fa;
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .real-time-indicator {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 8px;
+            height: 8px;
+            background: #28a745;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 1rem;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><i class="pi pi-th-large"></i> Graphic Library Builder - Digital Twin Configuration</h1>
+    </div>
+
+    <div class="main-container">
+        <!-- Left Panel: Upload & Gallery -->
+        <div class="left-panel">
+            <!-- Upload Panel -->
+            <div class="panel-header">
+                <i class="pi pi-upload"></i> Upload Graphics
+            </div>
+            
+            <div class="upload-zone" id="uploadZone">
+                <i class="pi pi-cloud-upload"></i>
+                <div>Drag & Drop graphics here</div>
+                <div style="font-size: 0.8rem; color: #666; margin-top: 0.5rem;">
+                    Supports: .svg, .png, .jpg
+                </div>
+                <input type="file" id="fileInput" class="hidden" multiple accept=".svg,.png,.jpg,.jpeg">
+                <button class="btn" onclick="document.getElementById('fileInput').click()" style="margin-top: 1rem;">
+                    Choose Files
+                </button>
+            </div>
+
+            <div class="form-group">
+                <label for="systemType">System Type</label>
+                <select id="systemType" class="form-control">
+                    <option value="">Select System Type</option>
+                    <option value="condensate">Condensate</option>
+                    <option value="feedwater">Feed Water</option>
+                    <option value="sh_rh">SH/RH</option>
+                    <option value="steam">Steam</option>
+                    <option value="cooling">Cooling</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="tagCategory">Tag Category</label>
+                <select id="tagCategory" class="form-control">
+                    <option value="">Select Tag Category</option>
+                    <option value="pump">Pump</option>
+                    <option value="valve">Valve</option>
+                    <option value="heat_exchanger">Heat Exchanger</option>
+                    <option value="sensor">Sensor</option>
+                    <option value="motor">Motor</option>
+                    <option value="pipe">Pipe</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" class="form-control" rows="3" placeholder="Enter description..."></textarea>
+            </div>
+
+            <!-- Thumbnail Gallery -->
+            <div class="panel-header" style="margin-top: 1rem;">
+                <i class="pi pi-images"></i> Graphic Library
+            </div>
+
+            <div class="filters">
+                <div class="filter-row">
+                    <select id="systemFilter" class="form-control">
+                        <option value="">All Systems</option>
+                        <option value="condensate">Condensate</option>
+                        <option value="feedwater">Feed Water</option>
+                        <option value="sh_rh">SH/RH</option>
+                        <option value="steam">Steam</option>
+                        <option value="cooling">Cooling</option>
+                    </select>
+                    <select id="categoryFilter" class="form-control">
+                        <option value="">All Categories</option>
+                        <option value="pump">Pump</option>
+                        <option value="valve">Valve</option>
+                        <option value="heat_exchanger">Heat Exchanger</option>
+                        <option value="sensor">Sensor</option>
+                        <option value="motor">Motor</option>
+                        <option value="pipe">Pipe</option>
+                    </select>
+                </div>
+                <input type="text" id="searchBox" class="search-box" placeholder="Search by description...">
+            </div>
+
+            <div class="gallery-grid" id="galleryGrid">
+                <!-- Thumbnails will be populated here -->
+            </div>
+        </div>
+
+        <!-- Center Panel: Canvas -->
+        <div class="canvas-area">
+            <div class="panel-header">
+                <i class="pi pi-sitemap"></i> Canvas Builder
+            </div>
+
+            <div class="canvas-toolbar">
+                <button class="tool-btn active" id="selectTool" onclick="setTool('select')">
+                    <i class="pi pi-cursor"></i>
+                </button>
+                <button class="tool-btn" id="panTool" onclick="setTool('pan')">
+                    <i class="pi pi-arrows-alt"></i>
+                </button>
+                <button class="tool-btn" onclick="zoomIn()">
+                    <i class="pi pi-search-plus"></i>
+                </button>
+                <button class="tool-btn" onclick="zoomOut()">
+                    <i class="pi pi-search-minus"></i>
+                </button>
+                <button class="tool-btn" onclick="resetView()">
+                    <i class="pi pi-refresh"></i>
+                </button>
+                <div style="margin-left: auto;">
+                    <label style="font-size: 0.8rem; margin-right: 0.5rem;">
+                        <input type="checkbox" id="snapToGrid" checked> Snap to Grid
+                    </label>
+                </div>
+            </div>
+
+            <div class="canvas-container">
+                <div id="konva-container"></div>
+            </div>
+
+            <div class="status-bar">
+                <span id="canvasStatus">Ready - Drag symbols from library to canvas</span>
+            </div>
+        </div>
+
+        <!-- Right Panel: Asset Binding -->
+        <div class="right-panel">
+            <div class="panel-header">
+                <i class="pi pi-link"></i> Asset Binding
+            </div>
+
+            <div id="assetBindingPanel" class="asset-binding">
+                <div class="binding-section">
+                    <h4>Selected Symbol</h4>
+                    <div id="selectedSymbolInfo">No symbol selected</div>
+                </div>
+
+                <div class="binding-section">
+                    <h4>Asset Assignment</h4>
+                    <select id="assetDropdown" class="form-control">
+                        <option value="">Select Asset</option>
+                        <option value="CP-101">CP-101 - Condensate Pump</option>
+                        <option value="FW-201">FW-201 - Feed Water Pump</option>
+                        <option value="HX-301">HX-301 - Heat Exchanger</option>
+                        <option value="VLV-401">VLV-401 - Control Valve</option>
+                        <option value="SEN-501">SEN-501 - Temperature Sensor</option>
+                    </select>
+                </div>
+
+                <div class="binding-section">
+                    <h4>Telemetry Tags</h4>
+                    <div class="tag-list" id="telemetryTags">
+                        <div class="tag-item" data-tag="temperature">Temperature (°C)</div>
+                        <div class="tag-item" data-tag="pressure">Pressure (Bar)</div>
+                        <div class="tag-item" data-tag="flow">Flow Rate (L/min)</div>
+                        <div class="tag-item" data-tag="vibration">Vibration (mm/s)</div>
+                        <div class="tag-item" data-tag="status">Operational Status</div>
+                    </div>
+                </div>
+
+                <div class="binding-section">
+                    <h4>Real-time Display</h4>
+                    <label style="font-size: 0.9rem;">
+                        <input type="checkbox" id="enableRealTime"> Enable Real-time Updates
+                    </label>
+                    <div class="metadata-display" id="bindingPreview">
+                        Binding preview will appear here
+                    </div>
+                </div>
+
+                <button class="btn btn-success" onclick="applyBinding()" style="width: 100%; margin-top: 1rem;">
+                    Apply Binding
+                </button>
+            </div>
+
+            <div id="noSelectionPanel" style="padding: 2rem; text-align: center; color: #666;">
+                <i class="pi pi-info-circle" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                <div>Select a symbol on the canvas to configure asset binding</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let stage, layer;
+        let currentTool = 'select';
+        let selectedShape = null;
+        let graphicLibrary = [];
+        let draggedSymbol = null;
+
+        // Initialize application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCanvas();
+            setupEventListeners();
+            loadSampleData();
+            updateAssetBindingPanel();
+        });
+
+        function initializeCanvas() {
+            const container = document.getElementById('konva-container');
+            const containerRect = container.getBoundingClientRect();
+            
+            stage = new Konva.Stage({
+                container: 'konva-container',
+                width: containerRect.width,
+                height: containerRect.height,
+                draggable: false
+            });
+
+            layer = new Konva.Layer();
+            stage.add(layer);
+
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                const newRect = container.getBoundingClientRect();
+                stage.width(newRect.width);
+                stage.height(newRect.height);
+            });
+
+            // Handle canvas clicks
+            stage.on('click', (e) => {
+                if (e.target === stage) {
+                    selectShape(null);
+                } else {
+                    selectShape(e.target);
+                }
+            });
+
+            // Handle drag and drop from gallery
+            stage.on('dragover', (e) => {
+                e.evt.preventDefault();
+            });
+
+            stage.on('drop', (e) => {
+                e.evt.preventDefault();
+                if (draggedSymbol) {
+                    addSymbolToCanvas(draggedSymbol, stage.getPointerPosition());
+                    draggedSymbol = null;
+                }
+            });
+        }
+
+        function setupEventListeners() {
+            // Upload zone
+            const uploadZone = document.getElementById('uploadZone');
+            const fileInput = document.getElementById('fileInput');
+
+            uploadZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('dragover');
+            });
+
+            uploadZone.addEventListener('dragleave', () => {
+                uploadZone.classList.remove('dragover');
+            });
+
+            uploadZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+                handleFileUpload(e.dataTransfer.files);
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                handleFileUpload(e.target.files);
+            });
+
+            // Filters
+            document.getElementById('systemFilter').addEventListener('change', filterGallery);
+            document.getElementById('categoryFilter').addEventListener('change', filterGallery);
+            document.getElementById('searchBox').addEventListener('input', filterGallery);
+
+            // Telemetry tags
+            document.getElementById('telemetryTags').addEventListener('click', (e) => {
+                if (e.target.classList.contains('tag-item')) {
+                    e.target.classList.toggle('selected');
+                    updateBindingPreview();
+                }
+            });
+
+            // Asset dropdown
+            document.getElementById('assetDropdown').addEventListener('change', updateBindingPreview);
+            document.getElementById('enableRealTime').addEventListener('change', updateBindingPreview);
+        }
+
+        function handleFileUpload(files) {
+            const systemType = document.getElementById('systemType').value;
+            const tagCategory = document.getElementById('tagCategory').value;
+            const description = document.getElementById('description').value;
+
+            if (!systemType || !tagCategory) {
+                showNotification('Please select System Type and Tag Category before uploading.', 'warning');
+                return;
+            }
+
+            Array.from(files).forEach(file => {
+                if (file.type.startsWith('image/') || file.name.endsWith('.svg')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const graphic = {
+                            id: Date.now() + Math.random(),
+                            name: file.name,
+                            systemType: systemType,
+                            tagCategory: tagCategory,
+                            description: description,
+                            dataUrl: e.target.result,
+                            type: file.type.includes('svg') ? 'svg' : 'image'
+                        };
+                        
+                        graphicLibrary.push(graphic);
+                        addThumbnailToGallery(graphic);
+                        showNotification(`${file.name} uploaded successfully!`);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Clear form
+            document.getElementById('systemType').value = '';
+            document.getElementById('tagCategory').value = '';
+            document.getElementById('description').value = '';
+        }
+
+        function addThumbnailToGallery(graphic) {
+            const gallery = document.getElementById('galleryGrid');
+            const item = document.createElement('div');
+            item.className = 'gallery-item';
+            item.dataset.id = graphic.id;
+            item.dataset.system = graphic.systemType;
+            item.dataset.category = graphic.tagCategory;
+            item.draggable = true;
+
+            const img = document.createElement('img');
+            img.src = graphic.dataUrl;
+            img.alt = graphic.name;
+
+            const label = document.createElement('div');
+            label.className = 'label';
+            label.textContent = graphic.name.split('.')[0];
+
+            const metadata = document.createElement('div');
+            metadata.className = 'metadata-display';
+            metadata.innerHTML = `${graphic.systemType} | ${graphic.tagCategory}`;
+
+            item.appendChild(img);
+            item.appendChild(label);
+            item.appendChild(metadata);
+
+            // Drag events
+            item.addEventListener('dragstart', (e) => {
+                draggedSymbol = graphic;
+                e.dataTransfer.effectAllowed = 'copy';
+            });
+
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.gallery-item').forEach(i => i.classList.remove('selected'));
+                item.classList.add('selected');
+            });
+
+            gallery.appendChild(item);
+        }
+
+        function addSymbolToCanvas(graphic, position) {
+            const img = new Image();
+            img.onload = function() {
+                const konvaImage = new Konva.Image({
+                    x: position ? position.x - 50 : 100,
+                    y: position ? position.y - 50 : 100,
+                    image: img,
+                    width: 100,
+                    height: 100,
+                    draggable: true,
+                    name: 'symbol'
+                });
+
+                // Add custom properties
+                konvaImage.setAttr('graphicId', graphic.id);
+                konvaImage.setAttr('graphicName', graphic.name);
+                konvaImage.setAttr('systemType', graphic.systemType);
+                konvaImage.setAttr('tagCategory', graphic.tagCategory);
+
+                // Snap to grid if enabled
+                if (document.getElementById('snapToGrid').checked) {
+                    konvaImage.on('dragmove', snapToGrid);
+                }
+
+                layer.add(konvaImage);
+                layer.draw();
+
+                // Select the newly added symbol
+                selectShape(konvaImage);
+                
+                updateCanvasStatus(`Added ${graphic.name} to canvas`);
+            };
+            img.src = graphic.dataUrl;
+        }
+
+        function selectShape(shape) {
+            // Remove previous selection
+            if (selectedShape) {
+                selectedShape.stroke(null);
+                selectedShape.strokeWidth(0);
+            }
+
+            selectedShape = shape;
+
+            if (shape && shape.name() === 'symbol') {
+                // Highlight selected shape
+                shape.stroke('#667eea');
+                shape.strokeWidth(2);
+                
+                // Update asset binding panel
+                updateAssetBindingPanel(shape);
+            } else {
+                updateAssetBindingPanel(null);
+            }
+
+            layer.draw();
+        }
+
+        function updateAssetBindingPanel(shape = null) {
+            const bindingPanel = document.getElementById('assetBindingPanel');
+            const noSelectionPanel = document.getElementById('noSelectionPanel');
+
+            if (shape) {
+                bindingPanel.style.display = 'block';
+                noSelectionPanel.style.display = 'none';
+
+                document.getElementById('selectedSymbolInfo').innerHTML = `
+                    <strong>${shape.getAttr('graphicName')}</strong><br>
+                    <small>System: ${shape.getAttr('systemType')} | Category: ${shape.getAttr('tagCategory')}</small>
+                `;
+            } else {
+                bindingPanel.style.display = 'none';
+                noSelectionPanel.style.display = 'block';
+            }
+        }
+
+        function updateBindingPreview() {
+            const asset = document.getElementById('assetDropdown').value;
+            const selectedTags = Array.from(document.querySelectorAll('.tag-item.selected')).map(tag => tag.dataset.tag);
+            const realTime = document.getElementById('enableRealTime').checked;
+
+            let preview = '';
+            if (asset) {
+                preview += `<strong>Asset:</strong> ${asset}<br>`;
+            }
+            if (selectedTags.length > 0) {
+                preview += `<strong>Tags:</strong> ${selectedTags.join(', ')}<br>`;
+            }
+            if (realTime) {
+                preview += `<strong>Real-time:</strong> Enabled`;
+            }
+
+            document.getElementById('bindingPreview').innerHTML = preview || 'Configure binding settings above';
+        }
+
+        function applyBinding() {
+            if (!selectedShape) {
+                showNotification('Please select a symbol first.', 'warning');
+                return;
+            }
+
+            const asset = document.getElementById('assetDropdown').value;
+            const selectedTags = Array.from(document.querySelectorAll('.tag-item.selected')).map(tag => tag.dataset.tag);
+            const realTime = document.getElementById('enableRealTime').checked;
+
+            if (!asset || selectedTags.length === 0) {
+                showNotification('Please select an asset and at least one telemetry tag.', 'warning');
+                return;
+            }
+
+            // Store binding data
+            selectedShape.setAttr('boundAsset', asset);
+            selectedShape.setAttr('boundTags', selectedTags);
+            selectedShape.setAttr('realTimeEnabled', realTime);
+
+            // Add visual indicator for bound symbols
+            if (realTime) {
+                const indicator = new Konva.Circle({
+                    x: selectedShape.x() + selectedShape.width() - 10,
+                    y: selectedShape.y() + 10,
+                    radius: 4,
+                    fill: '#28a745',
+                    name: 'realtime-indicator'
+                });
+                
+                // Animate the indicator
+                const anim = new Konva.Animation((frame) => {
+                    indicator.opacity(0.5 + 0.5 * Math.sin(frame.time * 0.005));
+                }, layer);
+                anim.start();
+
+                layer.add(indicator);
+            }
+
+            layer.draw();
+            showNotification(`Binding applied: ${asset} with ${selectedTags.length} tag(s)`);
+        }
+
+        function filterGallery() {
+            const systemFilter = document.getElementById('systemFilter').value;
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+
+            document.querySelectorAll('.gallery-item').forEach(item => {
+                const system = item.dataset.system;
+                const category = item.dataset.category;
+                const text = item.textContent.toLowerCase();
+
+                const matchesSystem = !systemFilter || system === systemFilter;
+                const matchesCategory = !categoryFilter || category === categoryFilter;
+                const matchesSearch = !searchTerm || text.includes(searchTerm);
+
+                item.style.display = matchesSystem && matchesCategory && matchesSearch ? 'block' : 'none';
+            });
+        }
+
+        function setTool(tool) {
+            currentTool = tool;
+            document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tool + 'Tool').classList.add('active');
+
+            stage.draggable(tool === 'pan');
+            updateCanvasStatus(`Tool: ${tool.charAt(0).toUpperCase() + tool.slice(1)}`);
+        }
+
+        function snapToGrid(e) {
+            const gridSize = 20;
+            e.target.x(Math.round(e.target.x() / gridSize) * gridSize);
+            e.target.y(Math.round(e.target.y() / gridSize) * gridSize);
+        }
+
+        function zoomIn() {
+            const scaleBy = 1.2;
+            const stage = layer.getStage();
+            const oldScale = stage.scaleX();
+            stage.scale({ x: oldScale * scaleBy, y: oldScale * scaleBy });
+            stage.batchDraw();
+        }
+
+        function zoomOut() {
+            const scaleBy = 1.2;
+            const stage = layer.getStage();
+            const oldScale = stage.scaleX();
+            stage.scale({ x: oldScale / scaleBy, y: oldScale / scaleBy });
+            stage.batchDraw();
+        }
+
+        function resetView() {
+            stage.scale({ x: 1, y: 1 });
+            stage.position({ x: 0, y: 0 });
+            stage.batchDraw();
+            updateCanvasStatus('View reset to default');
+        }
+
+        function updateCanvasStatus(message) {
+            document.getElementById('canvasStatus').textContent = message;
+        }
+
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="pi pi-${type === 'success' ? 'check' : 'exclamation-triangle'}"></i>
+                ${message}
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.classList.add('show'), 100);
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => document.body.removeChild(notification), 300);
+            }, 3000);
+        }
+
+        function loadSampleData() {
+            // Add some sample graphics for demonstration
+            const sampleGraphics = [
+                {
+                    id: 1,
+                    name: 'Pump-01.svg',
+                    systemType: 'condensate',
+                    tagCategory: 'pump',
+                    description: 'Condensate pump symbol',
+                    dataUrl: 'data:image/svg+xml;base64,' + btoa(`
+                        <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="50" cy="50" r="40" fill="#4CAF50" stroke="#333" stroke-width="2"/>
+                            <text x="50" y="55" text-anchor="middle" fill="white" font-size="12">PUMP</text>
+                        </svg>
+                    `),
+                    type: 'svg'
+                },
+                {
+                    id: 2,
+                    name: 'Valve-01.svg',
+                    systemType: 'feedwater',
+                    tagCategory: 'valve',
+                    description: 'Control valve symbol',
+                    dataUrl: 'data:image/svg+xml;base64,' + btoa(`
+                        <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+                            <polygon points="20,20 80,20 50,80" fill="#FF9800" stroke="#333" stroke-width="2"/>
+                            <text x="50" y="40" text-anchor="middle" fill="white" font-size="10">VALVE</text>
+                        </svg>
+                    `),
+                    type: 'svg'
+                },
+                {
+                    id: 3,
+                    name: 'HeatExchanger-01.svg',
+                    systemType: 'sh_rh',
+                    tagCategory: 'heat_exchanger',
+                    description: 'Heat exchanger symbol',
+                    dataUrl: 'data:image/svg+xml;base64,' + btoa(`
+                        <svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="15" y="30" width="70" height="40" fill="#2196F3" stroke="#333" stroke-width="2"/>
+                            <line x1="15" y1="40" x2="85" y2="60" stroke="white" stroke-width="2"/>
+                            <line x1="15" y1="60" x2="85" y2="40" stroke="white" stroke-width="2"/>
+                            <text x="50" y="55" text-anchor="middle" fill="white" font-size="8">HX</text>
+                        </svg>
+                    `),
+                    type: 'svg'
+                }
+            ];
+
+            sampleGraphics.forEach(graphic => {
+                graphicLibrary.push(graphic);
+                addThumbnailToGallery(graphic);
+            });
+        }
+
+        // Simulate real-time data updates
+        setInterval(() => {
+            const boundSymbols = layer.find('.symbol').filter(shape => shape.getAttr('realTimeEnabled'));
+            boundSymbols.forEach(symbol => {
+                // Simulate temperature changes with color coding
+                const temp = Math.random() * 100;
+                if (temp > 80) {
+                    symbol.saturation(0.8);
+                    symbol.red(1);
+                    symbol.green(0.2);
+                    symbol.blue(0.2);
+                } else if (temp > 60) {
+                    symbol.saturation(0.5);
+                    symbol.red(1);
+                    symbol.green(0.8);
+                    symbol.blue(0.2);
+                } else {
+                    symbol.saturation(0);
+                }
+            });
+            layer.draw();
+        }, 2000);
+    </script>
+</body>
+</html>

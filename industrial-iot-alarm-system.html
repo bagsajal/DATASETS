@@ -1,0 +1,1733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Industrial IoT Alarm Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a1a;
+            color: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .sidebar {
+            width: 280px;
+            background: #2c2c2c;
+            border-right: 1px solid #444;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: #1e1e1e;
+            padding: 1rem;
+            border-bottom: 1px solid #444;
+        }
+        
+        .logo {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 0.5rem;
+        }
+        
+        .nav-menu {
+            flex: 1;
+            padding: 1rem 0;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: rgba(76, 175, 80, 0.1);
+            border-left-color: #4CAF50;
+        }
+        
+        .nav-item.active {
+            background: rgba(76, 175, 80, 0.2);
+        }
+        
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            background: #666;
+            border-radius: 2px;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .top-bar {
+            background: #1e1e1e;
+            padding: 1rem;
+            border-bottom: 1px solid #444;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .breadcrumb {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        
+        .top-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .language-selector {
+            padding: 0.5rem 1rem;
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 4px;
+            color: #fff;
+            cursor: pointer;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #45a049;
+        }
+        
+        .btn-secondary {
+            background: #666;
+        }
+        
+        .btn-secondary:hover {
+            background: #777;
+        }
+        
+        .btn-danger {
+            background: #f44336;
+        }
+        
+        .btn-danger:hover {
+            background: #da190b;
+        }
+        
+        .content-area {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            background: #1a1a1a;
+        }
+        
+        .card {
+            background: #2c2c2c;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #444;
+        }
+        
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #4CAF50;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: #333;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .stat-card.critical {
+            border-left-color: #f44336;
+        }
+        
+        .stat-card.high {
+            border-left-color: #ff9800;
+        }
+        
+        .stat-card.medium {
+            border-left-color: #2196f3;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #2c2c2c;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .table th,
+        .table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #444;
+        }
+        
+        .table th {
+            background: #333;
+            font-weight: 600;
+            color: #4CAF50;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+        
+        .status-online {
+            background: #4CAF50;
+        }
+        
+        .status-offline {
+            background: #f44336;
+        }
+        
+        .status-warning {
+            background: #ff9800;
+        }
+        
+        .priority-critical {
+            color: #f44336;
+            font-weight: bold;
+        }
+        
+        .priority-high {
+            color: #ff9800;
+            font-weight: bold;
+        }
+        
+        .priority-medium {
+            color: #2196f3;
+        }
+        
+        .priority-low {
+            color: #aaa;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #ccc;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 4px;
+            color: #fff;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+        }
+        
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: #2c2c2c;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #444;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #4CAF50;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #444;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            background: #4CAF50;
+            color: white;
+            border-radius: 4px;
+            z-index: 1001;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .notification.error {
+            background: #f44336;
+        }
+        
+        .notification.warning {
+            background: #ff9800;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .checkbox {
+            width: 16px;
+            height: 16px;
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 2px;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .checkbox.checked {
+            background: #4CAF50;
+            border-color: #4CAF50;
+        }
+        
+        .checkbox.checked::after {
+            content: '✓';
+            position: absolute;
+            top: -2px;
+            left: 2px;
+            color: white;
+            font-size: 12px;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+            
+            .nav-item span {
+                display: none;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="header">
+                <div class="logo">🏭 IoT Alarm System</div>
+                <div style="font-size: 0.8rem; color: #aaa;">Industrial Grade</div>
+            </div>
+            <nav class="nav-menu">
+                <div class="nav-item active" data-module="dashboard">
+                    <div class="nav-icon"></div>
+                    <span>Dashboard</span>
+                </div>
+                <div class="nav-item" data-module="alarms">
+                    <div class="nav-icon"></div>
+                    <span>Active Alarms</span>
+                </div>
+                <div class="nav-item" data-module="config">
+                    <div class="nav-icon"></div>
+                    <span>Configuration</span>
+                </div>
+                <div class="nav-item" data-module="devices">
+                    <div class="nav-icon"></div>
+                    <span>Devices</span>
+                </div>
+                <div class="nav-item" data-module="analytics">
+                    <div class="nav-icon"></div>
+                    <span>Analytics</span>
+                </div>
+                <div class="nav-item" data-module="history">
+                    <div class="nav-icon"></div>
+                    <span>History</span>
+                </div>
+            </nav>
+        </div>
+        
+        <div class="main-content">
+            <div class="top-bar">
+                <div class="breadcrumb">Industrial IoT / <span id="current-module">Dashboard</span></div>
+                <div class="top-controls">
+                    <select class="language-selector" id="languageSelect">
+                        <option value="en">English</option>
+                        <option value="es">Español</option>
+                        <option value="de">Deutsch</option>
+                        <option value="fr">Français</option>
+                        <option value="zh">中文</option>
+                    </select>
+                    <button class="btn btn-secondary" onclick="exportData()">Export</button>
+                    <button class="btn" onclick="showNotification('System status updated', 'success')">Refresh</button>
+                </div>
+            </div>
+            
+            <div class="content-area" id="content-area">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Template -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modal-title">Modal Title</div>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Dynamic modal content -->
+            </div>
+            <div class="modal-footer" id="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn" id="modal-action">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global application state
+        let currentModule = 'dashboard';
+        let currentLanguage = 'en';
+        let alarms = [];
+        let devices = [];
+        let alarmRules = [];
+        
+        // Translation system
+        const translations = {
+            en: {
+                dashboard: 'Dashboard',
+                alarms: 'Active Alarms',
+                config: 'Configuration',
+                devices: 'Devices',
+                analytics: 'Analytics',
+                history: 'History',
+                totalAlarms: 'Total Alarms',
+                activeAlarms: 'Active Alarms',
+                acknowledgedAlarms: 'Acknowledged',
+                devicesOnline: 'Devices Online',
+                criticalAlarms: 'Critical',
+                highAlarms: 'High Priority',
+                mediumAlarms: 'Medium Priority',
+                lowAlarms: 'Low Priority'
+            },
+            es: {
+                dashboard: 'Panel de Control',
+                alarms: 'Alarmas Activas',
+                config: 'Configuración',
+                devices: 'Dispositivos',
+                analytics: 'Análisis',
+                history: 'Historial',
+                totalAlarms: 'Total de Alarmas',
+                activeAlarms: 'Alarmas Activas',
+                acknowledgedAlarms: 'Confirmadas',
+                devicesOnline: 'Dispositivos Online',
+                criticalAlarms: 'Críticas',
+                highAlarms: 'Alta Prioridad',
+                mediumAlarms: 'Prioridad Media',
+                lowAlarms: 'Baja Prioridad'
+            },
+            de: {
+                dashboard: 'Dashboard',
+                alarms: 'Aktive Alarme',
+                config: 'Konfiguration',
+                devices: 'Geräte',
+                analytics: 'Analytik',
+                history: 'Historie',
+                totalAlarms: 'Alarme Gesamt',
+                activeAlarms: 'Aktive Alarme',
+                acknowledgedAlarms: 'Bestätigt',
+                devicesOnline: 'Geräte Online',
+                criticalAlarms: 'Kritisch',
+                highAlarms: 'Hohe Priorität',
+                mediumAlarms: 'Mittlere Priorität',
+                lowAlarms: 'Niedrige Priorität'
+            },
+            fr: {
+                dashboard: 'Tableau de Bord',
+                alarms: 'Alarmes Actives',
+                config: 'Configuration',
+                devices: 'Appareils',
+                analytics: 'Analyses',
+                history: 'Historique',
+                totalAlarms: 'Total Alarmes',
+                activeAlarms: 'Alarmes Actives',
+                acknowledgedAlarms: 'Acquittées',
+                devicesOnline: 'Appareils En Ligne',
+                criticalAlarms: 'Critiques',
+                highAlarms: 'Haute Priorité',
+                mediumAlarms: 'Priorité Moyenne',
+                lowAlarms: 'Basse Priorité'
+            },
+            zh: {
+                dashboard: '仪表板',
+                alarms: '活动报警',
+                config: '配置',
+                devices: '设备',
+                analytics: '分析',
+                history: '历史',
+                totalAlarms: '总报警数',
+                activeAlarms: '活动报警',
+                acknowledgedAlarms: '已确认',
+                devicesOnline: '在线设备',
+                criticalAlarms: '严重',
+                highAlarms: '高优先级',
+                mediumAlarms: '中等优先级',
+                lowAlarms: '低优先级'
+            }
+        };
+        
+        // Initialize the application
+        function init() {
+            generateSampleData();
+            setupEventListeners();
+            loadModule('dashboard');
+            startRealTimeUpdates();
+        }
+        
+        // Generate sample data for demonstration
+        function generateSampleData() {
+            // Sample devices
+            devices = [
+                {
+                    id: 'DEV001',
+                    name: 'Temperature Sensor #1',
+                    type: 'Temperature',
+                    protocol: 'Modbus',
+                    status: 'online',
+                    location: 'Production Line A',
+                    lastSeen: new Date(),
+                    value: 85.2,
+                    unit: '°C'
+                },
+                {
+                    id: 'DEV002',
+                    name: 'Pressure Sensor #1',
+                    type: 'Pressure',
+                    protocol: 'OPC UA',
+                    status: 'online',
+                    location: 'Boiler Room',
+                    lastSeen: new Date(),
+                    value: 2.4,
+                    unit: 'bar'
+                },
+                {
+                    id: 'DEV003',
+                    name: 'Flow Meter #1',
+                    type: 'Flow',
+                    protocol: 'MQTT',
+                    status: 'offline',
+                    location: 'Pump Station',
+                    lastSeen: new Date(Date.now() - 300000),
+                    value: 0,
+                    unit: 'L/min'
+                },
+                {
+                    id: 'DEV004',
+                    name: 'Vibration Monitor #1',
+                    type: 'Vibration',
+                    protocol: 'HTTP',
+                    status: 'online',
+                    location: 'Compressor Area',
+                    lastSeen: new Date(),
+                    value: 4.7,
+                    unit: 'mm/s'
+                }
+            ];
+            
+            // Sample alarms
+            alarms = [
+                {
+                    id: 'ALM001',
+                    deviceId: 'DEV001',
+                    deviceName: 'Temperature Sensor #1',
+                    message: 'High temperature detected',
+                    priority: 'critical',
+                    status: 'active',
+                    timestamp: new Date(Date.now() - 120000),
+                    acknowledgedBy: null,
+                    acknowledgedAt: null,
+                    value: 95.8,
+                    threshold: 90,
+                    unit: '°C'
+                },
+                {
+                    id: 'ALM002',
+                    deviceId: 'DEV002',
+                    deviceName: 'Pressure Sensor #1',
+                    message: 'Pressure above normal range',
+                    priority: 'high',
+                    status: 'acknowledged',
+                    timestamp: new Date(Date.now() - 300000),
+                    acknowledgedBy: 'operator1',
+                    acknowledgedAt: new Date(Date.now() - 180000),
+                    value: 3.2,
+                    threshold: 3.0,
+                    unit: 'bar'
+                },
+                {
+                    id: 'ALM003',
+                    deviceId: 'DEV003',
+                    deviceName: 'Flow Meter #1',
+                    message: 'Device communication lost',
+                    priority: 'medium',
+                    status: 'active',
+                    timestamp: new Date(Date.now() - 600000),
+                    acknowledgedBy: null,
+                    acknowledgedAt: null,
+                    value: null,
+                    threshold: null,
+                    unit: null
+                }
+            ];
+            
+            // Sample alarm rules
+            alarmRules = [
+                {
+                    id: 'RULE001',
+                    name: 'High Temperature Alert',
+                    deviceType: 'Temperature',
+                    condition: 'greater_than',
+                    threshold: 90,
+                    priority: 'critical',
+                    enabled: true,
+                    notifications: ['email', 'dashboard']
+                },
+                {
+                    id: 'RULE002',
+                    name: 'Pressure Warning',
+                    deviceType: 'Pressure',
+                    condition: 'greater_than',
+                    threshold: 3.0,
+                    priority: 'high',
+                    enabled: true,
+                    notifications: ['dashboard', 'sms']
+                }
+            ];
+        }
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // Navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const module = item.dataset.module;
+                    loadModule(module);
+                });
+            });
+            
+            // Language selector
+            document.getElementById('languageSelect').addEventListener('change', (e) => {
+                changeLanguage(e.target.value);
+            });
+        }
+        
+        // Load module content
+        function loadModule(module) {
+            currentModule = module;
+            
+            // Update navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.module === module) {
+                    item.classList.add('active');
+                }
+            });
+            
+            // Update breadcrumb
+            document.getElementById('current-module').textContent = translate(module);
+            
+            // Load module content
+            const contentArea = document.getElementById('content-area');
+            
+            switch (module) {
+                case 'dashboard':
+                    contentArea.innerHTML = renderDashboard();
+                    break;
+                case 'alarms':
+                    contentArea.innerHTML = renderAlarms();
+                    break;
+                case 'config':
+                    contentArea.innerHTML = renderConfiguration();
+                    break;
+                case 'devices':
+                    contentArea.innerHTML = renderDevices();
+                    break;
+                case 'analytics':
+                    contentArea.innerHTML = renderAnalytics();
+                    break;
+                case 'history':
+                    contentArea.innerHTML = renderHistory();
+                    break;
+            }
+        }
+        
+        // Translation function
+        function translate(key) {
+            return translations[currentLanguage]?.[key] || key;
+        }
+        
+        // Change language
+        function changeLanguage(language) {
+            currentLanguage = language;
+            loadModule(currentModule); // Reload current module with new language
+            showNotification(`Language changed to ${language}`, 'success');
+        }
+        
+        // Render dashboard
+        function renderDashboard() {
+            const totalAlarms = alarms.length;
+            const activeAlarms = alarms.filter(a => a.status === 'active').length;
+            const acknowledgedAlarms = alarms.filter(a => a.status === 'acknowledged').length;
+            const devicesOnline = devices.filter(d => d.status === 'online').length;
+            const criticalAlarms = alarms.filter(a => a.priority === 'critical' && a.status === 'active').length;
+            const highAlarms = alarms.filter(a => a.priority === 'high' && a.status === 'active').length;
+            const mediumAlarms = alarms.filter(a => a.priority === 'medium' && a.status === 'active').length;
+            const lowAlarms = alarms.filter(a => a.priority === 'low' && a.status === 'active').length;
+            
+            return `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">${totalAlarms}</div>
+                        <div class="stat-label">${translate('totalAlarms')}</div>
+                    </div>
+                    <div class="stat-card critical">
+                        <div class="stat-number">${activeAlarms}</div>
+                        <div class="stat-label">${translate('activeAlarms')}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${acknowledgedAlarms}</div>
+                        <div class="stat-label">${translate('acknowledgedAlarms')}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${devicesOnline}/${devices.length}</div>
+                        <div class="stat-label">${translate('devicesOnline')}</div>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Alarm Priority Distribution</div>
+                        </div>
+                        <div class="stats-grid" style="grid-template-columns: 1fr 1fr;">
+                            <div class="stat-card critical">
+                                <div class="stat-number">${criticalAlarms}</div>
+                                <div class="stat-label">${translate('criticalAlarms')}</div>
+                            </div>
+                            <div class="stat-card high">
+                                <div class="stat-number">${highAlarms}</div>
+                                <div class="stat-label">${translate('highAlarms')}</div>
+                            </div>
+                            <div class="stat-card medium">
+                                <div class="stat-number">${mediumAlarms}</div>
+                                <div class="stat-label">${translate('mediumAlarms')}</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">${lowAlarms}</div>
+                                <div class="stat-label">${translate('lowAlarms')}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Recent Alarms</div>
+                        </div>
+                        <div style="max-height: 300px; overflow-y: auto;">
+                            ${alarms.slice(0, 5).map(alarm => `
+                                <div style="padding: 0.75rem; border-bottom: 1px solid #444; display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <div class="priority-${alarm.priority}">${alarm.message}</div>
+                                        <div style="font-size: 0.8rem; color: #aaa; margin-top: 0.25rem;">
+                                            ${alarm.deviceName} - ${formatTime(alarm.timestamp)}
+                                        </div>
+                                    </div>
+                                    <div class="status-indicator ${alarm.status === 'active' ? 'status-offline' : 'status-warning'}"></div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Device Status Overview</div>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Device</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Current Value</th>
+                                <th>Last Seen</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${devices.map(device => `
+                                <tr>
+                                    <td>
+                                        <div>${device.name}</div>
+                                        <div style="font-size: 0.8rem; color: #aaa;">${device.location}</div>
+                                    </td>
+                                    <td>${device.type}</td>
+                                    <td>
+                                        <span class="status-indicator status-${device.status === 'online' ? 'online' : 'offline'}"></span>
+                                        ${device.status}
+                                    </td>
+                                    <td>${device.value !== null ? device.value + ' ' + device.unit : 'N/A'}</td>
+                                    <td>${formatTime(device.lastSeen)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+        
+        // Format time for display
+        function formatTime(date) {
+            if (!date) return 'N/A';
+            const now = new Date();
+            const diff = now - date;
+            
+            if (diff < 60000) return 'Just now';
+            if (diff < 3600000) return Math.floor(diff / 60000) + ' min ago';
+            if (diff < 86400000) return Math.floor(diff / 3600000) + ' hrs ago';
+            return date.toLocaleDateString();
+        }
+        
+        // Show notification
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        
+        // Export data functionality
+        function exportData() {
+            const data = {
+                devices,
+                alarms,
+                alarmRules,
+                exportDate: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `iot-alarm-system-export-${new Date().toISOString().slice(0, 10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showNotification('Data exported successfully', 'success');
+        }
+        
+        // Modal functions
+        function showModal(title, body, actionText = 'Confirm', actionCallback = null) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-body').innerHTML = body;
+            document.getElementById('modal-action').textContent = actionText;
+            document.getElementById('modal-action').onclick = actionCallback || closeModal;
+            document.getElementById('modal').classList.add('show');
+        }
+        
+        function closeModal() {
+            document.getElementById('modal').classList.remove('show');
+        }
+        
+        // Start real-time updates
+        function startRealTimeUpdates() {
+            setInterval(() => {
+                // Simulate real-time data updates
+                devices.forEach(device => {
+                    if (device.status === 'online') {
+                        // Simulate value changes
+                        const variation = (Math.random() - 0.5) * 2;
+                        device.value = Math.max(0, device.value + variation);
+                        device.lastSeen = new Date();
+                        
+                        // Check for alarm conditions
+                        checkAlarmConditions(device);
+                    }
+                });
+                
+                // Update current view if it's dashboard
+                if (currentModule === 'dashboard') {
+                    loadModule('dashboard');
+                }
+            }, 5000); // Update every 5 seconds
+        }
+        
+        // Check alarm conditions
+        function checkAlarmConditions(device) {
+            const applicableRules = alarmRules.filter(rule => 
+                rule.enabled && rule.deviceType === device.type
+            );
+            
+            applicableRules.forEach(rule => {
+                let conditionMet = false;
+                
+                switch (rule.condition) {
+                    case 'greater_than':
+                        conditionMet = device.value > rule.threshold;
+                        break;
+                    case 'less_than':
+                        conditionMet = device.value < rule.threshold;
+                        break;
+                }
+                
+                if (conditionMet) {
+                    // Check if alarm already exists
+                    const existingAlarm = alarms.find(alarm => 
+                        alarm.deviceId === device.id && 
+                        alarm.status === 'active' &&
+                        alarm.message.includes(rule.name)
+                    );
+                    
+                    if (!existingAlarm) {
+                        // Create new alarm
+                        const newAlarm = {
+                            id: 'ALM' + (Date.now() % 10000).toString().padStart(3, '0'),
+                            deviceId: device.id,
+                            deviceName: device.name,
+                            message: `${rule.name}: ${device.value.toFixed(1)} ${device.unit}`,
+                            priority: rule.priority,
+                            status: 'active',
+                            timestamp: new Date(),
+                            acknowledgedBy: null,
+                            acknowledgedAt: null,
+                            value: device.value,
+                            threshold: rule.threshold,
+                            unit: device.unit
+                        };
+                        
+                        alarms.unshift(newAlarm);
+                        showNotification(`New ${rule.priority} alarm: ${newAlarm.message}`, 'error');
+                    }
+                }
+            });
+        }
+        
+        // Render alarms module
+        function renderAlarms() {
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Active Alarm Management</div>
+                        <div>
+                            <button class="btn btn-secondary" onclick="bulkAcknowledge()">Bulk Acknowledge</button>
+                            <button class="btn btn-secondary" onclick="bulkShelve()">Bulk Shelve</button>
+                        </div>
+                    </div>
+                    
+                    <div class="filters">
+                        <div class="filter-item">
+                            <input type="text" class="form-control" placeholder="Search alarms..." id="alarmSearch" style="width: 200px;" oninput="filterAlarms()">
+                        </div>
+                        <div class="filter-item">
+                            <select class="form-control" id="priorityFilter" onchange="filterAlarms()" style="width: 150px;">
+                                <option value="">All Priorities</option>
+                                <option value="critical">Critical</option>
+                                <option value="high">High</option>
+                                <option value="medium">Medium</option>
+                                <option value="low">Low</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <select class="form-control" id="statusFilter" onchange="filterAlarms()" style="width: 150px;">
+                                <option value="">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="acknowledged">Acknowledged</option>
+                                <option value="shelved">Shelved</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll()"></th>
+                                <th>Priority</th>
+                                <th>Device</th>
+                                <th>Message</th>
+                                <th>Timestamp</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="alarmTableBody">
+                            ${renderAlarmRows()}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+        
+        function renderAlarmRows() {
+            return alarms.map(alarm => `
+                <tr>
+                    <td><input type="checkbox" class="alarm-checkbox" value="${alarm.id}"></td>
+                    <td><span class="priority-${alarm.priority}">${alarm.priority.toUpperCase()}</span></td>
+                    <td>
+                        <div>${alarm.deviceName}</div>
+                        <div style="font-size: 0.8rem; color: #aaa;">${alarm.deviceId}</div>
+                    </td>
+                    <td>
+                        <div>${alarm.message}</div>
+                        ${alarm.value !== null ? `<div style="font-size: 0.8rem; color: #aaa;">Value: ${alarm.value} ${alarm.unit} (Threshold: ${alarm.threshold} ${alarm.unit})</div>` : ''}
+                    </td>
+                    <td>${formatTime(alarm.timestamp)}</td>
+                    <td>
+                        <span class="status-indicator status-${alarm.status === 'active' ? 'offline' : 'warning'}"></span>
+                        ${alarm.status}
+                        ${alarm.acknowledgedBy ? `<div style="font-size: 0.8rem; color: #aaa;">by ${alarm.acknowledgedBy}</div>` : ''}
+                    </td>
+                    <td>
+                        ${alarm.status === 'active' ? 
+                            `<button class="btn" style="padding: 0.25rem 0.5rem; margin-right: 0.25rem;" onclick="acknowledgeAlarm('${alarm.id}')">Acknowledge</button>
+                             <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem;" onclick="shelveAlarm('${alarm.id}')">Shelve</button>` : 
+                            '<span style="color: #aaa;">—</span>'
+                        }
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        // Render configuration module
+        function renderConfiguration() {
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Alarm Rule Configuration</div>
+                        <button class="btn" onclick="showCreateRuleModal()">Create New Rule</button>
+                    </div>
+                    
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Rule Name</th>
+                                <th>Device Type</th>
+                                <th>Condition</th>
+                                <th>Threshold</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${alarmRules.map(rule => `
+                                <tr>
+                                    <td>${rule.name}</td>
+                                    <td>${rule.deviceType}</td>
+                                    <td>${rule.condition.replace('_', ' ')}</td>
+                                    <td>${rule.threshold}</td>
+                                    <td><span class="priority-${rule.priority}">${rule.priority.toUpperCase()}</span></td>
+                                    <td>
+                                        <span class="status-indicator status-${rule.enabled ? 'online' : 'offline'}"></span>
+                                        ${rule.enabled ? 'Enabled' : 'Disabled'}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; margin-right: 0.25rem;" onclick="editRule('${rule.id}')">Edit</button>
+                                        <button class="btn ${rule.enabled ? 'btn-danger' : ''}" style="padding: 0.25rem 0.5rem;" onclick="toggleRule('${rule.id}')">${rule.enabled ? 'Disable' : 'Enable'}</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Configuration Management</div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                        <div>
+                            <h4 style="margin-bottom: 1rem; color: #4CAF50;">Export Configuration</h4>
+                            <p style="color: #aaa; margin-bottom: 1rem;">Export your current alarm rules and device configurations.</p>
+                            <button class="btn" onclick="exportConfiguration()">Export Configuration</button>
+                        </div>
+                        <div>
+                            <h4 style="margin-bottom: 1rem; color: #4CAF50;">Import Configuration</h4>
+                            <p style="color: #aaa; margin-bottom: 1rem;">Import alarm rules from a previously exported file.</p>
+                            <input type="file" id="configFile" accept=".json" style="margin-bottom: 1rem;" onchange="importConfiguration()">
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Render devices module
+        function renderDevices() {
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Device Management</div>
+                        <button class="btn" onclick="showAddDeviceModal()">Add Device</button>
+                    </div>
+                    
+                    <div class="filters">
+                        <div class="filter-item">
+                            <input type="text" class="form-control" placeholder="Search devices..." id="deviceSearch" style="width: 200px;" oninput="filterDevices()">
+                        </div>
+                        <div class="filter-item">
+                            <select class="form-control" id="deviceTypeFilter" onchange="filterDevices()" style="width: 150px;">
+                                <option value="">All Types</option>
+                                <option value="Temperature">Temperature</option>
+                                <option value="Pressure">Pressure</option>
+                                <option value="Flow">Flow</option>
+                                <option value="Vibration">Vibration</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <select class="form-control" id="deviceStatusFilter" onchange="filterDevices()" style="width: 150px;">
+                                <option value="">All Status</option>
+                                <option value="online">Online</option>
+                                <option value="offline">Offline</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Device ID</th>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Protocol</th>
+                                <th>Location</th>
+                                <th>Status</th>
+                                <th>Current Value</th>
+                                <th>Last Seen</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="deviceTableBody">
+                            ${renderDeviceRows()}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+        
+        function renderDeviceRows() {
+            return devices.map(device => `
+                <tr>
+                    <td><strong>${device.id}</strong></td>
+                    <td>${device.name}</td>
+                    <td>${device.type}</td>
+                    <td>${device.protocol}</td>
+                    <td>${device.location}</td>
+                    <td>
+                        <span class="status-indicator status-${device.status === 'online' ? 'online' : 'offline'}"></span>
+                        ${device.status}
+                    </td>
+                    <td>${device.value !== null ? device.value.toFixed(1) + ' ' + device.unit : 'N/A'}</td>
+                    <td>${formatTime(device.lastSeen)}</td>
+                    <td>
+                        <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; margin-right: 0.25rem;" onclick="editDevice('${device.id}')">Edit</button>
+                        <button class="btn btn-danger" style="padding: 0.25rem 0.5rem;" onclick="removeDevice('${device.id}')">Remove</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        // Render analytics module
+        function renderAnalytics() {
+            const totalAlarms = alarms.length;
+            const avgResponseTime = 12.5; // Simulated
+            const mttr = 8.3; // Mean Time To Resolution (simulated)
+            const acknowledgmentRate = ((alarms.filter(a => a.status === 'acknowledged').length / totalAlarms) * 100).toFixed(1);
+            
+            return `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">${avgResponseTime}min</div>
+                        <div class="stat-label">Avg Response Time</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${mttr}min</div>
+                        <div class="stat-label">Mean Time to Resolution</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${acknowledgmentRate}%</div>
+                        <div class="stat-label">Acknowledgment Rate</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${devices.filter(d => d.status === 'online').length}</div>
+                        <div class="stat-label">Active Devices</div>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Alarm Trends (Last 24h)</div>
+                        </div>
+                        <div style="height: 200px; display: flex; align-items: center; justify-content: center; color: #aaa;">
+                            📊 Chart placeholder - Ready for integration with charting library
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Device Performance</div>
+                        </div>
+                        <div style="height: 200px; display: flex; align-items: center; justify-content: center; color: #aaa;">
+                            📈 Performance chart placeholder
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Device-wise Alarm Distribution</div>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Device</th>
+                                <th>Total Alarms</th>
+                                <th>Critical</th>
+                                <th>High</th>
+                                <th>Medium</th>
+                                <th>Low</th>
+                                <th>Avg Resolution Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${devices.map(device => {
+                                const deviceAlarms = alarms.filter(a => a.deviceId === device.id);
+                                const critical = deviceAlarms.filter(a => a.priority === 'critical').length;
+                                const high = deviceAlarms.filter(a => a.priority === 'high').length;
+                                const medium = deviceAlarms.filter(a => a.priority === 'medium').length;
+                                const low = deviceAlarms.filter(a => a.priority === 'low').length;
+                                
+                                return `
+                                    <tr>
+                                        <td>
+                                            <div>${device.name}</div>
+                                            <div style="font-size: 0.8rem; color: #aaa;">${device.id}</div>
+                                        </td>
+                                        <td>${deviceAlarms.length}</td>
+                                        <td class="priority-critical">${critical}</td>
+                                        <td class="priority-high">${high}</td>
+                                        <td class="priority-medium">${medium}</td>
+                                        <td class="priority-low">${low}</td>
+                                        <td>${(Math.random() * 20 + 5).toFixed(1)} min</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+        
+        // Render history module
+        function renderHistory() {
+            return `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Alarm History</div>
+                        <div>
+                            <button class="btn btn-secondary" onclick="exportHistory()">Export History</button>
+                        </div>
+                    </div>
+                    
+                    <div class="filters">
+                        <div class="filter-item">
+                            <label class="form-label">Date Range:</label>
+                            <input type="date" class="form-control" id="startDate" style="width: 150px;">
+                        </div>
+                        <div class="filter-item">
+                            <label class="form-label">to</label>
+                            <input type="date" class="form-control" id="endDate" style="width: 150px;">
+                        </div>
+                        <div class="filter-item">
+                            <button class="btn btn-secondary" onclick="filterHistory()">Filter</button>
+                        </div>
+                    </div>
+                    
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Device</th>
+                                <th>Message</th>
+                                <th>Priority</th>
+                                <th>Duration</th>
+                                <th>Acknowledged By</th>
+                                <th>Resolution Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${alarms.map(alarm => {
+                                const duration = alarm.acknowledgedAt ? 
+                                    Math.round((alarm.acknowledgedAt - alarm.timestamp) / 60000) : 
+                                    Math.round((new Date() - alarm.timestamp) / 60000);
+                                
+                                return `
+                                    <tr>
+                                        <td>${alarm.timestamp.toLocaleString()}</td>
+                                        <td>
+                                            <div>${alarm.deviceName}</div>
+                                            <div style="font-size: 0.8rem; color: #aaa;">${alarm.deviceId}</div>
+                                        </td>
+                                        <td>${alarm.message}</td>
+                                        <td><span class="priority-${alarm.priority}">${alarm.priority.toUpperCase()}</span></td>
+                                        <td>${duration} min</td>
+                                        <td>${alarm.acknowledgedBy || 'Not acknowledged'}</td>
+                                        <td>${alarm.acknowledgedAt ? Math.round((alarm.acknowledgedAt - alarm.timestamp) / 60000) + ' min' : 'Ongoing'}</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+        
+        // Alarm management functions
+        function acknowledgeAlarm(alarmId) {
+            const alarm = alarms.find(a => a.id === alarmId);
+            if (alarm && alarm.status === 'active') {
+                alarm.status = 'acknowledged';
+                alarm.acknowledgedBy = 'current_user';
+                alarm.acknowledgedAt = new Date();
+                showNotification(`Alarm ${alarmId} acknowledged`, 'success');
+                loadModule(currentModule);
+            }
+        }
+        
+        function shelveAlarm(alarmId) {
+            const alarm = alarms.find(a => a.id === alarmId);
+            if (alarm && alarm.status === 'active') {
+                alarm.status = 'shelved';
+                alarm.shelvedBy = 'current_user';
+                alarm.shelvedAt = new Date();
+                showNotification(`Alarm ${alarmId} shelved`, 'success');
+                loadModule(currentModule);
+            }
+        }
+        
+        function bulkAcknowledge() {
+            const selectedAlarms = Array.from(document.querySelectorAll('.alarm-checkbox:checked')).map(cb => cb.value);
+            selectedAlarms.forEach(acknowledgeAlarm);
+            showNotification(`${selectedAlarms.length} alarms acknowledged`, 'success');
+        }
+        
+        function bulkShelve() {
+            const selectedAlarms = Array.from(document.querySelectorAll('.alarm-checkbox:checked')).map(cb => cb.value);
+            selectedAlarms.forEach(shelveAlarm);
+            showNotification(`${selectedAlarms.length} alarms shelved`, 'success');
+        }
+        
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('.alarm-checkbox');
+            checkboxes.forEach(cb => cb.checked = selectAll.checked);
+        }
+        
+        // Configuration functions
+        function showCreateRuleModal() {
+            const modalBody = `
+                <div class="form-group">
+                    <label class="form-label">Rule Name</label>
+                    <input type="text" class="form-control" id="ruleName" placeholder="Enter rule name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Device Type</label>
+                    <select class="form-control" id="ruleDeviceType">
+                        <option value="Temperature">Temperature</option>
+                        <option value="Pressure">Pressure</option>
+                        <option value="Flow">Flow</option>
+                        <option value="Vibration">Vibration</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Condition</label>
+                    <select class="form-control" id="ruleCondition">
+                        <option value="greater_than">Greater than</option>
+                        <option value="less_than">Less than</option>
+                        <option value="equals">Equals</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Threshold</label>
+                    <input type="number" class="form-control" id="ruleThreshold" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Priority</label>
+                    <select class="form-control" id="rulePriority">
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                        <option value="critical">Critical</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Notifications</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" value="email"> Email
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" value="sms"> SMS
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" value="dashboard" checked> Dashboard
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="checkbox" value="webhook"> Webhook
+                        </label>
+                    </div>
+                </div>
+            `;
+            
+            showModal('Create Alarm Rule', modalBody, 'Create Rule', createAlarmRule);
+        }
+        
+        function createAlarmRule() {
+            const ruleName = document.getElementById('ruleName').value;
+            const deviceType = document.getElementById('ruleDeviceType').value;
+            const condition = document.getElementById('ruleCondition').value;
+            const threshold = parseFloat(document.getElementById('ruleThreshold').value);
+            const priority = document.getElementById('rulePriority').value;
+            const notifications = Array.from(document.querySelectorAll('#modal input[type="checkbox"]:checked')).map(cb => cb.value);
+            
+            if (!ruleName || isNaN(threshold)) {
+                showNotification('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            const newRule = {
+                id: 'RULE' + (Date.now() % 10000).toString().padStart(3, '0'),
+                name: ruleName,
+                deviceType,
+                condition,
+                threshold,
+                priority,
+                enabled: true,
+                notifications
+            };
+            
+            alarmRules.push(newRule);
+            showNotification('Alarm rule created successfully', 'success');
+            closeModal();
+            loadModule('config');
+        }
+        
+        function exportConfiguration() {
+            const config = {
+                alarmRules,
+                exportDate: new Date().toISOString(),
+                version: '1.0'
+            };
+            
+            const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `alarm-rules-${new Date().toISOString().slice(0, 10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showNotification('Configuration exported successfully', 'success');
+        }
+        
+        function importConfiguration() {
+            const file = document.getElementById('configFile').files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const config = JSON.parse(e.target.result);
+                    if (config.alarmRules && Array.isArray(config.alarmRules)) {
+                        alarmRules.push(...config.alarmRules);
+                        showNotification('Configuration imported successfully', 'success');
+                        loadModule('config');
+                    } else {
+                        showNotification('Invalid configuration file format', 'error');
+                    }
+                } catch (error) {
+                    showNotification('Error reading configuration file', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+        
+        // Device management functions
+        function showAddDeviceModal() {
+            const modalBody = `
+                <div class="form-group">
+                    <label class="form-label">Device ID</label>
+                    <input type="text" class="form-control" id="deviceId" placeholder="DEV001">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Device Name</label>
+                    <input type="text" class="form-control" id="deviceName" placeholder="Temperature Sensor #1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Device Type</label>
+                    <select class="form-control" id="deviceType">
+                        <option value="Temperature">Temperature</option>
+                        <option value="Pressure">Pressure</option>
+                        <option value="Flow">Flow</option>
+                        <option value="Vibration">Vibration</option>
+                        <option value="Humidity">Humidity</option>
+                        <option value="Level">Level</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Protocol</label>
+                    <select class="form-control" id="deviceProtocol">
+                        <option value="Modbus">Modbus TCP/RTU</option>
+                        <option value="OPC UA">OPC UA</option>
+                        <option value="MQTT">MQTT</option>
+                        <option value="HTTP">HTTP/REST</option>
+                        <option value="BACnet">BACnet</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Location</label>
+                    <input type="text" class="form-control" id="deviceLocation" placeholder="Production Line A">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Unit</label>
+                    <input type="text" class="form-control" id="deviceUnit" placeholder="°C">
+                </div>
+            `;
+            
+            showModal('Add New Device', modalBody, 'Add Device', addDevice);
+        }
+        
+        function addDevice() {
+            const deviceId = document.getElementById('deviceId').value;
+            const deviceName = document.getElementById('deviceName').value;
+            const deviceType = document.getElementById('deviceType').value;
+            const protocol = document.getElementById('deviceProtocol').value;
+            const location = document.getElementById('deviceLocation').value;
+            const unit = document.getElementById('deviceUnit').value;
+            
+            if (!deviceId || !deviceName || !location || !unit) {
+                showNotification('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            const newDevice = {
+                id: deviceId,
+                name: deviceName,
+                type: deviceType,
+                protocol,
+                status: 'online',
+                location,
+                lastSeen: new Date(),
+                value: Math.random() * 100,
+                unit
+            };
+            
+            devices.push(newDevice);
+            showNotification('Device added successfully', 'success');
+            closeModal();
+            loadModule('devices');
+        }
+        
+        // Filter functions
+        function filterAlarms() {
+            const search = document.getElementById('alarmSearch').value.toLowerCase();
+            const priority = document.getElementById('priorityFilter').value;
+            const status = document.getElementById('statusFilter').value;
+            
+            // This is a simplified filter - in a real app you'd update the table
+            loadModule('alarms');
+        }
+        
+        function filterDevices() {
+            const search = document.getElementById('deviceSearch').value.toLowerCase();
+            const type = document.getElementById('deviceTypeFilter').value;
+            const status = document.getElementById('deviceStatusFilter').value;
+            
+            // This is a simplified filter - in a real app you'd update the table
+            loadModule('devices');
+        }
+        
+        function filterHistory() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            showNotification('History filtered', 'success');
+            // In a real app, you'd apply the date filter to the history data
+        }
+        
+        function exportHistory() {
+            const historyData = {
+                alarms,
+                exportDate: new Date().toISOString(),
+                dateRange: {
+                    start: document.getElementById('startDate')?.value || 'all',
+                    end: document.getElementById('endDate')?.value || 'all'
+                }
+            };
+            
+            const blob = new Blob([JSON.stringify(historyData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `alarm-history-${new Date().toISOString().slice(0, 10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showNotification('History exported successfully', 'success');
+        }
+        
+        // Initialize application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

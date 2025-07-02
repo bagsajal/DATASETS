@@ -1,170 +1,200 @@
-# Graphic Library Builder - Digital Twin Configuration
+# Industrial IoT Alarm Management System
 
-A comprehensive PrimeNG-based HTML application for building and managing graphic libraries for digital twin configurations in thermal power plant systems.
+A comprehensive, self-contained HTML application for managing industrial IoT alarms with a modern, professional interface inspired by PrimeNG components.
 
-## Features
+## 🎯 Features Overview
 
-### 🔧 **Graphic Upload Panel**
-- **Drag & Drop Upload**: Intuitive file upload with visual feedback
-- **Supported Formats**: .svg, .png, .jpg, .jpeg
-- **Metadata Management**:
-  - System Type (Condensate, Feed Water, SH/RH, Steam, Cooling)
-  - Tag Category (Pump, Valve, Heat Exchanger, Sensor, Motor, Pipe)
-  - Description field for detailed documentation
-- **Visual Upload Feedback**: Hover effects and upload notifications
+### 🎛️ Configuration & Management UI
+- **Low-code alarm rule creation** with intuitive forms and validation
+- **Visual alarm configuration** with dropdowns for device types, conditions, and priorities
+- **Import/Export functionality** for configuration backup and restoration
+- **Multi-device support** with various sensor types (Temperature, Pressure, Flow, Vibration, etc.)
 
-### 📚 **Thumbnail Gallery & Library Management**
-- **Grid View**: Responsive thumbnail display with metadata
-- **Advanced Filtering**:
-  - Filter by System Type
-  - Filter by Tag Category
-  - Real-time search by description
-- **Visual Selection**: Click to select graphics with visual highlighting
-- **Drag-to-Canvas**: Direct drag & drop from gallery to canvas
+### 📊 Dashboard & Monitoring
+- **Real-time alarm statistics** with color-coded severity levels
+- **Live alarm feed** showing recent activity and current status
+- **Device status monitoring** with online/offline indicators
+- **Interactive navigation** between different modules
 
-### 🎨 **Canvas Builder (Konva.js Integration)**
-- **Interactive Canvas**: Grid-based workspace with snap-to-grid functionality
-- **Tool Palette**:
-  - Select Tool: Click and select symbols
-  - Pan Tool: Navigate large diagrams
-  - Zoom In/Out: Scale control for detailed work
-  - Reset View: Return to default zoom/position
-- **Symbol Management**:
-  - Drag symbols from library to canvas
-  - Resize and position symbols
-  - Visual selection indicators
-  - Real-time status updates
+### ⚠️ Active Alarm Management
+- **Bulk operations** - acknowledge or shelve multiple alarms simultaneously
+- **Individual alarm actions** with quick action buttons
+- **Advanced filtering** and search capabilities
+- **Priority-based visual indicators** for quick assessment
 
-### 🔗 **Asset Binding Interface**
-- **Dynamic Side Panel**: Appears when symbols are selected
-- **Asset Assignment**: Dropdown selection of predefined assets
-- **Telemetry Tag Selection**:
-  - Temperature (°C)
-  - Pressure (Bar)
-  - Flow Rate (L/min)
-  - Vibration (mm/s)
-  - Operational Status
-- **Real-time Data Visualization**:
-  - Enable/disable real-time updates
-  - Visual indicators for bound symbols
-  - Color-coded status representation
-- **Binding Preview**: Live preview of configuration settings
+### 📈 Analytics & History
+- **Alarm trend analysis** with placeholders ready for chart integration
+- **Historical data export** functionality
+- **Device-wise alarm distribution** views
+- **Performance metrics** including response times and acknowledgment rates
 
-### ⚡ **Real-time Monitoring Simulation**
-- **Color-coded Status**: Symbols change color based on simulated sensor data
-- **Pulsing Indicators**: Animated indicators for real-time enabled symbols
-- **Temperature Simulation**: 
-  - Red: >80°C (High temperature alert)
-  - Yellow: 60-80°C (Warning range)
-  - Normal: <60°C (Safe operation)
+### � Multi-language Support
+- **5 languages included**: English, Spanish, German, French, Chinese
+- **Dynamic language switching** without page reload
+- **Extensible translation system** for additional languages
 
-## Usage Instructions
+### 📱 Modern Industrial UI
+- **Responsive design** that works on tablets and mobile devices
+- **Professional color scheme** suitable for industrial environments
+- **Accessibility considerations** with proper contrast ratios
+- **Real-time notifications** for user feedback
 
-### 1. **Upload Graphics**
-1. Select System Type and Tag Category from dropdowns
-2. Add description (optional)
-3. Either drag & drop files or click "Choose Files"
-4. Files will automatically appear in the gallery below
+## � Getting Started
 
-### 2. **Browse Library**
-1. Use filter dropdowns to narrow down graphics by system/category
-2. Use search box to find graphics by description
-3. Click on thumbnails to select them
+### Quick Start
+1. Download the `industrial-iot-alarm-system.html` file
+2. Open it in any modern web browser
+3. The application is fully functional with simulated data
 
-### 3. **Build Canvas Diagrams**
-1. Drag symbols from the gallery to the canvas
-2. Use toolbar tools to navigate and manipulate the view
-3. Click on symbols to select them (highlighted with blue border)
-4. Enable "Snap to Grid" for precise alignment
+### System Requirements
+- Modern web browser (Chrome, Firefox, Safari, Edge)
+- JavaScript enabled
+- No server or installation required
 
-### 4. **Configure Asset Binding**
-1. Select a symbol on the canvas
-2. Choose an asset from the dropdown (e.g., "CP-101 - Condensate Pump")
-3. Select relevant telemetry tags
-4. Enable real-time updates if desired
-5. Click "Apply Binding" to save configuration
+## 📋 Module Guide
 
-### 5. **Monitor Real-time Data**
-- Bound symbols with real-time enabled will show pulsing green indicators
-- Symbol colors will change based on simulated sensor readings
-- Use this to visualize system status at a glance
+### Dashboard
+- Overview of system status and alarm statistics
+- Real-time device status monitoring
+- Priority-based alarm distribution
+- Recent alarm activity feed
 
-## Technical Features
+### Active Alarms
+- View and manage all active alarms
+- Filter by priority, status, or search terms
+- Bulk acknowledge or shelve operations
+- Individual alarm actions
 
-### **Frontend Technologies**
-- **PrimeNG**: Professional UI component library
-- **Konva.js**: High-performance 2D canvas library
-- **HTML5 Canvas**: Hardware-accelerated graphics
-- **CSS Grid**: Responsive layout system
-- **JavaScript ES6+**: Modern web standards
+### Configuration
+- Create and manage alarm rules
+- Configure thresholds and conditions
+- Set notification preferences
+- Import/export configuration files
 
-### **Canvas Capabilities**
-- **Performance**: Optimized for large-scale diagrams
-- **Interactivity**: Full mouse/touch support
-- **Scalability**: Zoom and pan for detailed work
-- **Persistence**: Maintains symbol properties and bindings
+### Devices
+- Manage connected IoT devices
+- Monitor device status and values
+- Add new devices with various protocols
+- View device-specific information
 
-### **Data Management**
-- **In-memory Storage**: Client-side graphic library management
-- **Metadata Preservation**: System/category/description tracking
-- **Binding Persistence**: Asset and telemetry tag relationships
-- **Real-time Simulation**: Live data visualization
+### Analytics
+- Performance metrics and KPIs
+- Device-wise alarm analysis
+- Response time statistics
+- Ready for chart library integration
 
-## Sample Assets Included
+### History
+- Complete alarm history
+- Date range filtering
+- Export historical data
+- Resolution time tracking
 
-The application comes pre-loaded with sample graphics:
+## 🔧 Industrial IoT Integration Features
 
-1. **Pump Symbol** (Condensate System)
-   - Green circular design with "PUMP" label
-   - Ready for condensate pump asset binding
+### Supported Protocols
+- **Modbus TCP/RTU** - Industrial standard for device communication
+- **OPC UA** - Industry 4.0 communication protocol
+- **MQTT** - Lightweight messaging for IoT devices
+- **HTTP/REST** - Web-based device integration
+- **BACnet** - Building automation systems
 
-2. **Valve Symbol** (Feed Water System)
-   - Orange triangular design with "VALVE" label
-   - Ideal for control valve configurations
+### Alarm Management
+- **Configurable thresholds** with multiple condition types
+- **Priority levels**: Critical, High, Medium, Low
+- **Multiple notification methods**: Email, SMS, Dashboard, Webhook
+- **Acknowledgment and shelving workflows**
 
-3. **Heat Exchanger Symbol** (SH/RH System)
-   - Blue rectangular design with crossing lines
-   - Perfect for heat transfer equipment
+### Data Management
+- **Local storage** for configuration persistence
+- **Export/Import** functionality for data backup
+- **Real-time simulation** for demonstration purposes
 
-## Browser Compatibility
+## 🎨 Customization
 
-- **Chrome**: 90+ (Recommended)
-- **Firefox**: 88+
-- **Safari**: 14+
-- **Edge**: 90+
+### Styling
+The application uses CSS custom properties for easy theming:
+- Modify color schemes in the CSS variables
+- Adjust component sizes and spacing
+- Customize the industrial color palette
 
-## File Structure
-
-```
-graphic-library-builder.html    # Main application file
-README.md                      # Documentation (this file)
+### Language Support
+Add new languages by extending the `translations` object:
+```javascript
+translations.pt = {
+    dashboard: 'Painel',
+    alarms: 'Alarmes',
+    // ... add more translations
+};
 ```
 
-## Future Integration Points
+### Data Integration
+Replace the `generateSampleData()` function with real data sources:
+- Connect to actual IoT devices
+- Integrate with existing databases
+- Add real-time WebSocket connections
 
-This application is designed to integrate with:
+## 🔒 Security Considerations
 
-- **Google Cloud Platform**: Firestore for canvas storage
-- **Pub/Sub**: Real-time telemetry data streams
-- **Cloud Functions**: Server-side processing
-- **Digital Twin Systems**: Asset and tag management
-- **SCADA Integration**: Live plant data feeds
+For production deployment:
+- Implement proper authentication and authorization
+- Use HTTPS for secure communication
+- Validate all user inputs
+- Implement role-based access control
+- Add audit logging for all actions
 
-## Getting Started
+## 📊 Performance Features
 
-1. Download the `graphic-library-builder.html` file
-2. Open in any modern web browser
-3. Start uploading your graphics and building diagrams
-4. No installation or server setup required!
+- **Efficient rendering** with minimal DOM updates
+- **Real-time updates** every 5 seconds (configurable)
+- **Responsive design** for various screen sizes
+- **Memory-efficient** data handling
 
-## Performance Notes
+## 🛠️ Development Notes
 
-- **Optimized Rendering**: Konva.js provides smooth canvas operations
-- **Memory Efficient**: Client-side storage with minimal footprint
-- **Responsive Design**: Works on desktop, tablet, and mobile devices
-- **Fast Filtering**: Real-time search and filter capabilities
+### Architecture
+- **Single-page application** with modular design
+- **Component-based** rendering system
+- **Event-driven** alarm checking and updates
+- **Extensible** module system
+
+### Browser Compatibility
+- Chrome 60+
+- Firefox 55+
+- Safari 11+
+- Edge 79+
+
+## 📈 Future Enhancements
+
+### Chart Integration
+The application includes placeholders for charts. Integrate with:
+- Chart.js for basic charts
+- D3.js for advanced visualizations
+- Highcharts for professional dashboards
+
+### Real-time Features
+- WebSocket integration for real-time updates
+- Push notifications for critical alarms
+- Live device status monitoring
+
+### Advanced Analytics
+- Machine learning for predictive maintenance
+- Trend analysis and forecasting
+- Anomaly detection algorithms
+
+## 📞 Support
+
+This is a demonstration application showcasing industrial IoT alarm management capabilities. For production use, consider:
+
+1. **Backend Integration** - Connect to real data sources
+2. **Authentication System** - Implement user management
+3. **Database Integration** - Persistent data storage
+4. **API Development** - REST/GraphQL APIs for device integration
+5. **Monitoring & Logging** - Production-grade observability
+
+## 📝 License
+
+This application is provided as a demonstration of industrial IoT alarm management capabilities. Modify and use according to your requirements.
 
 ---
 
-**Built for Digital Twin Configuration**  
-*Enabling visual flow diagram creation for thermal power plant systems*
+**Industrial IoT Alarm Management System** - Professional grade alarm monitoring and management for industrial environments.

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Alarm Configurator</title>
+
+    <!-- PrimeNG / PrimeFlex / PrimeIcons CSS (for styling only) -->
+    <link rel="stylesheet" href="https://unpkg.com/primeng/resources/themes/saga-blue/theme.css" />
+    <link rel="stylesheet" href="https://unpkg.com/primeng/resources/primeng.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/primeflex@3.4.1/primeflex.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/primeicons/primeicons.css" />
+
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            font-family: var(--font-family);
+        }
+
+        /* Sidebar (palette) */
+        #palette {
+            width: 220px;
+            background: var(--surface-a);
+            border-right: 1px solid var(--surface-d);
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .palette-header {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .node-card {
+            user-select: none;
+            cursor: grab;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Canvas */
+        #workspace {
+            flex: 1;
+            position: relative;
+            background-image: linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px),
+                linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px);
+            background-size: 20px 20px;
+            overflow: hidden;
+        }
+
+        /* Dropped node inside workspace */
+        .workspace-node {
+            position: absolute;
+            width: 180px;
+            cursor: move;
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar: palette with draggable nodes -->
+    <aside id="palette">
+        <div class="palette-header">WC NODE NODE</div>
+        <div class="p-card node-card p-pt-2 p-pb-2 p-pl-2 p-pr-2" draggable="true" data-nodetype="configure-alarm">
+            <i class="pi pi-exclamation-triangle p-mr-2" style="color: var(--orange-500)"></i>
+            Configure Alarm
+        </div>
+        <div class="p-card node-card p-pt-2 p-pb-2 p-pl-2 p-pr-2" draggable="true" data-nodetype="condition">
+            <i class="pi pi-filter p-mr-2" style="color: var(--blue-500)"></i>
+            CR Condition
+        </div>
+        <div class="p-card node-card p-pt-2 p-pb-2 p-pl-2 p-pr-2" draggable="true" data-nodetype="save-config">
+            <i class="pi pi-save p-mr-2" style="color: var(--green-500)"></i>
+            Save Config
+        </div>
+        <div class="p-card node-card p-pt-2 p-pb-2 p-pl-2 p-pr-2" draggable="true" data-nodetype="check-condition">
+            <i class="pi pi-check p-mr-2" style="color: var(--purple-500)"></i>
+            Check Condition
+        </div>
+        <div class="p-card node-card p-pt-2 p-pb-2 p-pl-2 p-pr-2" draggable="true" data-nodetype="create-alarm">
+            <i class="pi pi-bell p-mr-2" style="color: var(--cyan-500)"></i>
+            Create Alarm
+        </div>
+        <div class="p-card node-card p-pt-2 p-pb-2 p-pl-2 p-pr-2" draggable="true" data-nodetype="debug">
+            <i class="pi pi-bug p-mr-2" style="color: var(--pink-500)"></i>
+            Debug
+        </div>
+    </aside>
+
+    <!-- Main work area -->
+    <main id="workspace"></main>
+
+    <script>
+        // Helper to generate a unique ID
+        const uuid = () => '_' + Math.random().toString(36).substr(2, 9);
+
+        // Drag & Drop handlers for palette items
+        const palette = document.getElementById('palette');
+        palette.addEventListener('dragstart', (e) => {
+            if (e.target.closest('.node-card')) {
+                e.dataTransfer.setData('text/plain', e.target.dataset.nodetype);
+                // store cursor offset relative to target for better positioning
+                const rect = e.target.getBoundingClientRect();
+                const offsetX = e.clientX - rect.left;
+                const offsetY = e.clientY - rect.top;
+                e.dataTransfer.setData('text/offsetX', offsetX);
+                e.dataTransfer.setData('text/offsetY', offsetY);
+            }
+        });
+
+        // Workspace drop functionality
+        const workspace = document.getElementById('workspace');
+        workspace.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+        workspace.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const type = e.dataTransfer.getData('text/plain');
+            if (!type) return;
+            const offsetX = parseInt(e.dataTransfer.getData('text/offsetX')) || 0;
+            const offsetY = parseInt(e.dataTransfer.getData('text/offsetY')) || 0;
+
+            const nodeEl = document.createElement('div');
+            nodeEl.className = 'p-card workspace-node p-pt-2 p-pb-2 p-pl-2 p-pr-2';
+            nodeEl.draggable = true;
+            nodeEl.id = uuid();
+            nodeEl.style.left = (e.clientX - workspace.getBoundingClientRect().left - offsetX) + 'px';
+            nodeEl.style.top = (e.clientY - workspace.getBoundingClientRect().top - offsetY) + 'px';
+            nodeEl.innerHTML = getNodeContent(type);
+
+            workspace.appendChild(nodeEl);
+        });
+
+        // Allow nodes inside workspace to be dragged again
+        workspace.addEventListener('dragstart', (e) => {
+            if (e.target.closest('.workspace-node')) {
+                const node = e.target.closest('.workspace-node');
+                const rect = node.getBoundingClientRect();
+                const offsetX = e.clientX - rect.left;
+                const offsetY = e.clientY - rect.top;
+                e.dataTransfer.setData('text/id', node.id);
+                e.dataTransfer.setData('text/offsetX', offsetX);
+                e.dataTransfer.setData('text/offsetY', offsetY);
+            }
+        });
+
+        workspace.addEventListener('drop', (e) => {
+            const nodeId = e.dataTransfer.getData('text/id');
+            if (nodeId) {
+                const node = document.getElementById(nodeId);
+                const offsetX = parseInt(e.dataTransfer.getData('text/offsetX')) || 0;
+                const offsetY = parseInt(e.dataTransfer.getData('text/offsetY')) || 0;
+                node.style.left = (e.clientX - workspace.getBoundingClientRect().left - offsetX) + 'px';
+                node.style.top = (e.clientY - workspace.getBoundingClientRect().top - offsetY) + 'px';
+            }
+        });
+
+        // Generate icon & label depending on node type
+        function getNodeContent(type) {
+            switch (type) {
+                case 'configure-alarm':
+                    return '<i class="pi pi-exclamation-triangle p-mr-2" style="color: var(--orange-500)"></i>Configure Alarm';
+                case 'condition':
+                    return '<i class="pi pi-filter p-mr-2" style="color: var(--blue-500)"></i>CR Condition';
+                case 'save-config':
+                    return '<i class="pi pi-save p-mr-2" style="color: var(--green-500)"></i>Save Config';
+                case 'check-condition':
+                    return '<i class="pi pi-check p-mr-2" style="color: var(--purple-500)"></i>Check Condition';
+                case 'create-alarm':
+                    return '<i class="pi pi-bell p-mr-2" style="color: var(--cyan-500)"></i>Create Alarm';
+                case 'debug':
+                    return '<i class="pi pi-bug p-mr-2" style="color: var(--pink-500)"></i>Debug';
+                default:
+                    return 'Node';
+            }
+        }
+    </script>
+</body>
+</html>
